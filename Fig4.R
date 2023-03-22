@@ -12,7 +12,9 @@ library(viridis)
 library(ggh4x)
 library(sf)
 
-run_base <- 1031
+select <- dplyr::select
+
+run_base <- 1044
 run_hw <- 1063
 
 # set paths to directories
@@ -133,7 +135,7 @@ plot_abun <- function(fg,out,this.nc,hw){
 }
 
 fg_to_plot <- c('Capelin', 'Sandlance', 'Herring', 
-                'Arrowtooth_flounder', 'Pollock', 'Cod', 'Shallow_demersal',
+                'Arrowtooth_flounder', 'Pollock', 'Cod',
                 'Seabird_dive_fish', 'Seabird_surface_fish')
 
 naa_base <- bind_rows(purrr::map(fg_to_plot, plot_abun, out = out_base, this.nc = this_nc_base, hw = FALSE))
@@ -160,4 +162,50 @@ p <- ggplot()+
   labs(col="Age Group",y="Numbers (Millions)",x="Year")+
   facet_grid2(run ~ Name, scales = 'free_y', independent = 'y')
 p
-ggsave('naa.png',p,width = 16,height=5)
+ggsave('naa_cod.png',p,width = 12,height=5)
+
+# heatmap for changes in condition
+naa_base_heatmap <- naa_base %>%
+  select(year:abun, Name) %>%
+  rename(abun_ctrl = abun)
+naa_hw_heatmap <- naa_hw %>%
+  select(year:abun, Name) %>%
+  rename(abun_hw = abun)
+
+naa_heatmap <- naa_base_heatmap %>%
+  left_join(naa_hw_heatmap, by = c('year','age','age_group','Name')) %>%
+  mutate(percent_change = ((abun_hw-abun_ctrl)/abun_ctrl)*100) %>%
+  filter(year >= 25)
+
+# remove _Nums from age_group
+naa_heatmap$age_group <- gsub('_Nums', '', naa_heatmap$age_group)
+
+# order
+naa_heatmap <- naa_heatmap %>%
+  arrange(year, factor(Name, levels = fg_to_plot), age)
+
+# fix order of age_group
+naa_heatmap$age_group <- factor(naa_heatmap$age_group, 
+                                levels = rev(unique(naa_heatmap$age_group)))
+
+# add facets 
+naa_heatmap <- naa_heatmap %>%
+  rowwise() %>%
+  mutate(Guild = case_when(
+    Name %in% c('Capelin', 'Sandlance', 'Herring') ~ 'Forage fish',
+    Name %in% c('Arrowtooth_flounder', 'Pollock', 'Cod') ~ 'Groundfish',
+    Name %in% c('Seabird_dive_fish', 'Seabird_surface_fish') ~ 'Seabirds'
+  )) %>%
+  ungroup()
+
+# plot
+phm <- ggplot()+
+  geom_tile(data = naa_heatmap, aes(x = year, y = age_group, fill = percent_change))+
+  scale_fill_viridis()+
+  geom_vline(xintercept = 30, color = 'red', linetype = 'dashed')+
+  geom_vline(xintercept = 35, color = 'red', linetype = 'dashed')+
+  theme_bw()+
+  labs(x = 'Year', y = '', fill = 'Percent change', title = 'Relative change in numbers at age - heatwave run vs control run')+
+  facet_grid(rows = 'Guild', scales = 'free_y')
+phm
+ggsave('naa_relchange.png',phm,width = 8,height=9)

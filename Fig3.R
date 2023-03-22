@@ -12,8 +12,10 @@ library(viridis)
 library(ggh4x)
 library(sf)
 
-run_base <- 1031
-run_hw <- 1063
+select <- dplyr::select
+
+run_base <- 1044
+run_hw <- 1062
 
 # set paths to directories
 dir_base <- paste0('../../GOA/Parametrization/output_files/data/out_', run_base, '/')
@@ -159,7 +161,7 @@ plot_wage_timeseries <- function(fg,out,this.nc,hw){
 }
 
 fg_to_plot <- c('Capelin', 'Sandlance', 'Herring', 
-                'Arrowtooth_flounder', 'Pollock', 'Cod', 'Shallow_demersal',
+                'Arrowtooth_flounder', 'Pollock', 'Cod',
                 'Seabird_dive_fish', 'Seabird_surface_fish')
 
 waa_base <- bind_rows(purrr::map(fg_to_plot, plot_wage_timeseries, out = out_base, this.nc = this_nc_base, hw = FALSE))
@@ -186,4 +188,50 @@ p <- ggplot()+
   labs(col="Age Group",y="Wet Weight per Individual (kg)",x="Year")+
   facet_grid2(run ~ Name, scales = 'free_y', independent = 'y')
 p
-ggsave('waa.png',p,width = 16,height=5)
+ggsave('waa.png',p,width = 12,height=5)
+
+# heatmap for changes in condition
+waa_base_heatmap <- waa_base %>%
+  select(year:weight, Name) %>%
+  rename(weight_ctrl = weight)
+waa_hw_heatmap <- waa_hw %>%
+  select(year:weight, Name) %>%
+  rename(weight_hw = weight)
+
+waa_heatmap <- waa_base_heatmap %>%
+  left_join(waa_hw_heatmap, by = c('year','age','age_group','Name')) %>%
+  mutate(percent_change = ((weight_hw-weight_ctrl)/weight_ctrl)*100) %>%
+  filter(year >= 25)
+
+# remove _ResN from age_group
+waa_heatmap$age_group <- gsub('_ResN', '', waa_heatmap$age_group)
+
+# order
+waa_heatmap <- waa_heatmap %>%
+  arrange(year, factor(Name, levels = fg_to_plot), age)
+
+# fix order of age_group
+waa_heatmap$age_group <- factor(waa_heatmap$age_group, 
+                                levels = rev(unique(waa_heatmap$age_group)))
+
+# add facets 
+waa_heatmap <- waa_heatmap %>%
+  rowwise() %>%
+  mutate(Guild = case_when(
+    Name %in% c('Capelin', 'Sandlance', 'Herring') ~ 'Forage fish',
+    Name %in% c('Arrowtooth_flounder', 'Pollock', 'Cod') ~ 'Groundfish',
+    Name %in% c('Seabird_dive_fish', 'Seabird_surface_fish') ~ 'Seabirds'
+  )) %>%
+  ungroup()
+
+# plot
+phm <- ggplot()+
+  geom_tile(data = waa_heatmap, aes(x = year, y = age_group, fill = percent_change))+
+  scale_fill_viridis()+
+  geom_vline(xintercept = 30, color = 'red', linetype = 'dashed')+
+  geom_vline(xintercept = 35, color = 'red', linetype = 'dashed')+
+  theme_bw()+
+  labs(x = 'Year', y = '', fill = 'Percent change', title = 'Relative change in weight at age - heatwave run vs control run')+
+  facet_grid(rows = 'Guild', scales = 'free_y')
+phm
+ggsave('waa_relchange.png',phm,width = 8,height=9)
