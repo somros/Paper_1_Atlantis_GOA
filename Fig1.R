@@ -2,6 +2,7 @@
 # 3/21/2023
 # Code to create Fig. 1 for ECCWO poster
 # Fig. 1 Atlantis GOA map, Temperature values in space, and trajectory for heat wave from ROMS hindcast, highlight the heatwave
+# Also plot CEATTLE bioenergetics and thermal windows from Aquamaps, to have it all in one place
 
 coast <- maps::map(database = 'worldHires', regions = c('USA','Canada'), plot = FALSE, fill=TRUE)
 
@@ -58,20 +59,22 @@ colnames(temp_df) <-   c(paste0('lyr',6:1), 'sed', 'box_id', 'ts')
 
 # plot time series
 p_ts <- temp_df %>%
-  dplyr::select(ts,box_id,lyr1) %>%
+  dplyr::select(ts,box_id,lyr1,sed) %>%
+  pivot_longer(-c(ts,box_id), names_to = 'lyr', values_to = 'temp') %>%
   rowwise() %>%
-  mutate(lyr1 = ifelse(box_id %in% boundary_boxes, NA, lyr1)) %>% # turn boundary boxes to NA temp, we do not want those to confuse the average plot
+  mutate(temp = ifelse(box_id %in% boundary_boxes, NA, temp)) %>% # turn boundary boxes to NA temp, we do not want those to confuse the average plot
   ungroup() %>%
   left_join(areas, by = c('box_id'='b')) %>% # add areas for weighting
-  group_by(ts) %>%
-  summarise(sst = weighted.mean(lyr1, area, na.rm = T)) %>%
+  group_by(ts, lyr) %>%
+  summarise(temp = weighted.mean(temp, area, na.rm = T)) %>%
   ungroup() %>%
+  filter(lyr == 'sed') %>%
   ggplot()+
-  geom_line(aes(x = ts, y = sst), linewidth = 0.8)+
+  geom_line(aes(x = ts, y = temp), linewidth = 0.8)+
   theme_bw()+
-  labs(x = 'Year', y = 'SST (\u00B0C)')
+  labs(x = 'Year', y = 'SBT (\u00B0C)')
 p_ts
-ggsave(paste0('output/', 'goa_sst_ts_', run_hw, '.png'), p_ts, width = 5, height = 2)
+ggsave(paste0('output/', 'goa_sbt_ts_', run_hw, '.png'), p_ts, width = 5, height = 2)
 
 # # plot by box to compare with input files viewed in Shane's code
 temp_df %>%
@@ -81,42 +84,187 @@ temp_df %>%
   geom_line(aes(x = ts, y = lyr1, color = factor(box_id)))#+
   #guides(color = "none")
 
-sst_df <- temp_df %>%
-  dplyr::select(ts,box_id,lyr1) %>%
+temp_df <- temp_df %>%
+  dplyr::select(ts,box_id,lyr1,sed) %>%
+  pivot_longer(-c(ts,box_id), names_to = 'lyr', values_to = 'temp') %>%
   rowwise() %>%
-  mutate(hw = ifelse(ts < 30 || ts >= 35, 'pre_hw', 'hw')) %>% # change these when we have the real forcings
+  mutate(period = ifelse(ts < 30 || ts >= 35, 'pre_hw', 'hw')) %>% # change these when we have the real forcings
   filter(ts %in% seq(0.6,40,1)) %>% # this is July, for September use 0.8. This will matter for spatial patterns
-  group_by(hw, box_id) %>%
-  summarize(mean_sst = mean(lyr1)) %>% # means by box per period (pre and during heatwave)
+  group_by(period, box_id, lyr) %>%
+  summarize(mean_temp = mean(temp)) %>% # means by box per period (pre and during heatwave)
   ungroup()
 
 # now join to spatial data set
-goa_sst_sf <- goa_sf %>%
-  left_join(sst_df, by = 'box_id') %>%
+goa_temp_sf <- goa_sf %>%
+  left_join(temp_df, by = 'box_id') %>%
   rowwise() %>%
-  mutate(mean_sst = ifelse(boundary == "TRUE" || botz >= 0, NA, mean_sst)) %>%
+  mutate(mean_temp = ifelse(boundary == "TRUE" || botz >= 0, NA, mean_temp)) %>%
   ungroup() %>%
-  dplyr::select(box_id, hw, mean_sst) %>%
-  pivot_wider(names_from = 'hw', values_from = 'mean_sst') %>%
-  mutate(delta_sst = hw - pre_hw)
+  dplyr::select(period, box_id, lyr, mean_temp) %>%
+  pivot_wider(names_from = 'period', values_from = 'mean_temp') %>%
+  mutate(delta_temp = hw - pre_hw)
 
 # plot delta
-p_delta <- ggplot()+
-  geom_sf(data = goa_sst_sf, aes(fill = delta_sst))+
+# surface
+p_delta_s <- ggplot()+
+  geom_sf(data = goa_temp_sf %>% filter(lyr == 'lyr1'), aes(fill = delta_temp))+
   scale_fill_viridis()+
   geom_sf(data = coast_sf)+
   theme_bw()+
   labs(fill = '\u0394SST (\u00B0C)')
-p_delta
-ggsave(paste0('output/', 'goa_delta_sst_', run_hw, '_vs_', run_base, '.png'), p_delta, width = 8, height = 3)
+p_delta_s
+ggsave(paste0('output/', 'goa_delta_sst_', run_hw, '_vs_', run_base, '.png'), p_delta_s, width = 8, height = 3)
+
+# bottom
+p_delta_b <- ggplot()+
+  geom_sf(data = goa_temp_sf %>% filter(lyr == 'sed'), aes(fill = delta_temp))+
+  scale_fill_viridis()+
+  geom_sf(data = coast_sf)+
+  theme_bw()+
+  labs(fill = '\u0394SBT (\u00B0C)')
+p_delta_b
+ggsave(paste0('output/', 'goa_delta_sbt_', run_hw, '_vs_', run_base, '.png'), p_delta_b, width = 8, height = 3)
 
 # plot summer temps
-p_summer <- ggplot()+
-  geom_sf(data = goa_sst_sf, aes(fill = hw))+
+# surface
+p_summer_s <- ggplot()+
+  geom_sf(data = goa_temp_sf %>% filter(lyr == 'lyr1'), aes(fill = hw))+
   scale_fill_viridis()+
   geom_sf(data = coast_sf)+
   theme_bw()+
   labs(fill = 'Heatwave SST (\u00B0C)')
-p_summer
-ggsave(paste0('output/', 'goa_summer_sst_', run_hw, '_vs_', run_base, '.png'), p_summer, width = 8, height = 3)
+p_summer_s
+ggsave(paste0('output/', 'goa_summer_sst_', run_hw, '_vs_', run_base, '.png'), p_summer_s, width = 8, height = 3)
+
+# bottom
+p_summer_b <- ggplot()+
+  geom_sf(data = goa_temp_sf %>% filter(lyr == 'sed'), aes(fill = hw))+
+  scale_fill_viridis()+
+  geom_sf(data = coast_sf)+
+  theme_bw()+
+  labs(fill = 'Heatwave SBT (\u00B0C)')
+p_summer_b
+ggsave(paste0('output/', 'goa_summer_sbt_', run_hw, '_vs_', run_base, '.png'), p_summer_b, width = 8, height = 3)
+
+
+# CEATTLE -----------------------------------------------------------------
+
+# Bioenergetics from CEATTLE
+# Pollock, Cod, and ATF from: Holsman, K. K., & Aydin, K. (2015). Comparative methods for evaluating climate change impacts on the foraging ecology of Alaskan groundfish. Marine Ecology Progress Series, 521, 217–235. https://doi.org/10.3354/meps11102
+# Halibut from: Holsman, KK, Aydin, K, Sullivan, J, Hurst, T, Kruse, GH. Climate effects and bottom-up controls on growth and size-at-age of Pacific halibut (Hippoglossus stenolepis) in Alaska (USA). Fish Oceanogr. 2019; 28: 345– 358. https://doi.org/10.1111/fog.12416
+
+dat <- data.frame('Par' = c('Cq', 'Tc0', 'Tcm'),
+                  'Pollock' = c(2.6, 10, 15),
+                  'Cod' = c(2.41, 13.7, 21),
+                  'ATF' = c(2.497, 20.512, 26),
+                  'Halibut' = c(3.084, 12.97, 18))
+
+# TC0 is the temperature where laboratory consumption rates are highest, TCM is the maximum water
+# temperature above which consumption ceases and CQ approximates the Q10 or the rate at which 
+# the function increases over relatively low water temperatures.
+
+make_curve <- function(species, dat, Tamb){
+  
+  Cq <- dat %>% filter(Par == 'Cq') %>% pull(species)
+  Tc0 <- dat %>% filter(Par == 'Tc0') %>% pull(species)
+  Tcm <- dat %>% filter(Par == 'Tcm') %>% pull(species)
+  
+  Y <- log(Cq) * (Tcm - Tc0 + 2)
+  Z <- log(Cq) * (Tcm - Tc0)
+  X <- (Z^2 * (1 + (1 + 40/Y)^0.5)^2)/400
+  V <- (Tcm - Tamb) / (Tcm - Tc0)
+  
+  Tcorr <- V^X * exp((X * (1 - V)))
+  
+  return(Tcorr)
+  
+}
+
+tcorr_frame <- data.frame('Tamb' = seq(0, 30, 0.1)) %>%
+  mutate(Pollock = make_curve('Pollock', dat, Tamb),
+         Cod = make_curve('Cod', dat, Tamb),
+         ATF = make_curve('ATF', dat, Tamb),
+         Halibut = make_curve('Halibut', dat, Tamb)) 
+
+tcorr_frame_long <- tcorr_frame %>%
+  pivot_longer(-Tamb, names_to = 'Species', values_to = 'Tcorr')
+
+tcorr_frame_long$Species <- gsub('ATF', 'Arrowtooth_flounder', tcorr_frame_long$Species)
+  
+p_q10 <- tcorr_frame_long %>%
+  ggplot(aes(x = Tamb, y = Tcorr, color = Species))+
+  geom_line(linewidth = 1.5)+
+  scale_color_viridis_d(begin = 0.1, end = 0.9)+
+  theme_bw()+
+  labs(x = 'Temperature (\u00B0C)', 'Tcorr')
+
+p_q10
+ggsave('output/CEATTLE_bioenergetics.png', p_q10, width = 4, height = 2)
+
+
+# AQUAMPAS ----------------------------------------------------------------
+
+dat <- read.csv('../../GOA/Parametrization/thermal_responses/thermal_niches_aquamaps_0_100_percentiles.csv')
+
+# added for AMSS 1/17/2023
+# Change COD, POL, ATF, HAL so that max is same as the maximum in the bioenergetics
+dat$max[dat$Code=='POL'] <- 15
+dat$max[dat$Code=='COD'] <- 21
+dat$max[dat$Code=='ATF'] <- 26
+dat$max[dat$Code=='HAL'] <- 18
+
+temp <- seq(-5,35,0.1)
+k <- 2 # this is same for all for now
+
+make_niche <- function(min_sp, max_sp, current_enviro, K_const_sp = k){
+  
+  step1 <- K_const_sp * exp(current_enviro - min_sp) / (K_const_sp + (exp(current_enviro - min_sp) - 1.0))
+  step2 <- K_const_sp * exp(max_sp - current_enviro) / (K_const_sp + (exp(max_sp - current_enviro) - 1.0))
+  
+  # case sensitive_biologistic_window: // Gaussian shape
+  numScalar <- 1.0
+  step3 <- step1 / K_const_sp
+  step4 <- step2 / K_const_sp
+  if (step3 > step4) {
+    numScalar <- step4
+  } else {
+    numScalar <- step3
+  }
+  
+  return(numScalar)
+}
+
+dat1 <- dat %>%
+  rename(mint = min, maxt = max)
+
+# atach temperature as column
+dat2 <- do.call("rbind", replicate(length(temp), dat1, simplify = FALSE)) %>%
+  arrange(Index) %>%
+  mutate(temp = rep(temp, nrow(dat)))
+
+# apply function
+to_show <- c('Arrowtooth_flounder','Cod','Halibut','Pollock')
+
+dat3 <- dat2 %>%
+  mutate(niche = purrr::pmap(list(min_sp = mint, max_sp = maxt, current_enviro = temp), make_niche)) %>%
+  unnest(cols = c('niche')) %>%
+  select(Code, Name, mint, maxt, temp, niche)
+
+dat_vline <- dat3 %>%
+  select(Code, Name, mint, maxt) %>%
+  filter(Name %in% to_show)%>%
+  pivot_longer(-c(Code, Name), names_to = 'edge', values_to = 'temp')
+
+# plot
+p_niche <- dat3 %>%
+  filter(Name %in% to_show)%>%
+  ggplot()+
+  geom_line(aes(x = temp, y = niche), linewidth = 1.5)+
+  geom_vline(data = dat_vline, aes(xintercept = temp, color = edge), linewidth = 1.5)+
+  scale_color_viridis_d(begin = 0.2, end = 0.8)+
+  theme_bw()+
+  labs(x = 'Temperature (\u00B0C)', y = 'Scalar on abundance', color = '')+
+  facet_wrap(~Name, ncol = 4)
+p_niche
+ggsave('output/thermal_niche_eccwo.png', p_niche, width = 8.5, height = 2)
   
