@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 4/3/2023
-# Code to create Fig. 5 for ECCWO poster
+# Code to create Fig. 5 for ICES paper
 # Fig. 5 spatial patterns
 # all the extraction code is take from Owen and PY's code
 # only plot spatial for full model, with thermal HW forcings as well as plankton
@@ -55,8 +55,12 @@
 
 # apply naa plotting function
 
-fg_to_plot <- c('Capelin', 'Sandlance', 'Herring', 
-                'Arrowtooth_flounder', 'Pollock', 'Cod')#,
+fg_to_plot <- c('Capelin',  
+                'Arrowtooth_flounder',
+                'Sandlance', 
+                'Pollock',
+                'Herring', 
+                'Cod')#,
                 #'Seabird_dive_fish', 'Seabird_surface_fish')
 
 box_naa_base <- bind_rows(purrr::map(fg_to_plot, plot_abun, out = out_base, this.nc = this_nc_base, run = 'base', spatial = TRUE))
@@ -79,19 +83,27 @@ box_naa_sf <- goa_sf %>%
 
 # reorder factors
 box_naa_sf$Name <- factor(box_naa_sf$Name, 
-                          levels = c('Capelin', 'Arrowtooth_flounder', 'Sandlance', 'Pollock', 'Herring','Cod'))
+                          levels = c('Capelin',  
+                                     'Arrowtooth_flounder',
+                                     'Sandlance', 
+                                     'Pollock',
+                                     'Herring', 
+                                     'Cod'))
 
 p_map <- box_naa_sf %>%
   split(.$Name) %>%
   purrr::map(~ ggplot()+
-  geom_sf(data = ., aes(fill = mean_change, color = mean_change), color = NA)+
-  scale_fill_viridis()+
-  geom_sf(data = coast_sf)+
-  theme_bw()+
-  labs(fill = '%') +
-  facet_wrap(~Name)) %>%
+               geom_sf(data = ., aes(fill = mean_change, color = mean_change), color = NA)+
+               scale_fill_viridis()+
+               geom_sf(data = coast_sf)+
+               theme_bw()+
+               theme(legend.position=c(.1,.7),
+                     legend.background = element_blank(),
+                     legend.key.size = unit(0.35, 'cm'))+
+               labs(fill = '') +
+               facet_wrap(~Name)) %>%
   cowplot::plot_grid(plotlist = ., ncol = 2)
 p_map
   
 ggsave(paste0('output/', 'map_naa_relchange_', run_base, '_vs_', run_hw,'.png'),
-       p_map,width = 9,height=4.8)  
+       p_map,width = 8,height=6, dpi = 600)  

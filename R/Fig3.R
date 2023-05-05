@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 3/21/2023
-# Code to create Fig. 3 for ECCWO poster
+# Code to create Fig. 3 for ICES paper
 # Fig. 3 weight at age and biomass of forage fish and groups that feed on it
 # all the extraction code is take from Owen and PY's code
 
@@ -101,4 +101,4 @@ waa_hm <- ggplot()+
 waa_hm
 
 ggsave(paste0('output/', 'waa_relchange.png'),
-       waa_hm,width = 7.5,height=8.5)
+       waa_hm,width = 8, height=9, dpi = 600)

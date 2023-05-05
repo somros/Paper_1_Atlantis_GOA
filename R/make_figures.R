@@ -21,10 +21,10 @@ run_prod <- 1117 # just plankton prod scalar
 run_hw_prod <- 1115 # temp and plankton scalar - "true" heatwave scenario
 
 # set paths to directories
-dir_base <- paste0('../../GOA/Parametrization/output_files/data/out_', run_base, '/')
-dir_hw <- paste0('../../GOA/Parametrization/output_files/data/out_', run_hw, '/')
-dir_prod <- paste0('../../GOA/Parametrization/output_files/data/out_', run_prod, '/')
-dir_hw_prod <- paste0('../../GOA/Parametrization/output_files/data/out_', run_hw_prod, '/')
+dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
+dir_hw <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_hw, '/')
+dir_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_prod, '/')
+dir_hw_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_hw_prod, '/')
 
 # Read files --------------------------------------------------------------
 # Geography: read bgm

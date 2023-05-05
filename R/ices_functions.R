@@ -111,9 +111,9 @@ plot_abun <- function(fg, out, this.nc, run, spatial = FALSE){
 }
 
 # reshape diets and compare between the periods
-compare_diets <- function(dietcheck, prednames, run, cohorts = FALSE){
+compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
   
-  if(!cohorts){
+  if(age_split == 'none'){
     
     dietcheck1 <- dietcheck %>%
       filter(Predator %in% preds_to_keep & Updated == 0) %>% # IDK what Updated means but it seems to pertain the last time step only
@@ -137,7 +137,7 @@ compare_diets <- function(dietcheck, prednames, run, cohorts = FALSE){
 
       colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
     
-  } else {
+  } else if (age_split == 'cohort') {
     
     dietcheck1 <- dietcheck %>%
       filter(Predator %in% preds_to_keep & Updated == 0) %>% # IDK what Updated means but it seems to pertain the last time step only
@@ -157,6 +157,32 @@ compare_diets <- function(dietcheck, prednames, run, cohorts = FALSE){
       filter(Prop > 0.01)
     
       colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
+      
+  } else {
+    
+    # we use this otpion for the plot for the last 5 year average by age class and all predators, can also place this in another function
+    
+    dietcheck1 <- dietcheck %>%
+      mutate(Time = Time / 365) %>%
+      filter(Time >= (max(Time)-5)) %>% # focus on hw years only
+      left_join(agemat, by = c('Predator' = 'Code')) %>%
+      rowwise() %>%
+      mutate(Stage = ifelse(is.na(agemat), 1, ifelse(Cohort < agemat, 0, 1))) %>%
+      ungroup() %>%
+      group_by(Predator, Stage) %>%
+      summarise(across(KWT:DR, mean)) %>%
+      ungroup() %>%
+      pivot_longer(-c(Predator, Stage), names_to = 'Prey', values_to = 'Prop') %>%
+      left_join((grps %>% select(Code, Name)), by = c('Predator'='Code')) %>%
+      rename(Predator_Name = Name) %>%
+      select(-Predator) %>%
+      left_join((grps %>% select(Code, Name)), by = c('Prey'='Code')) %>%
+      rename(Prey_Name = Name) %>%
+      select(Prop, Predator_Name, Stage, Prey_Name)%>%
+      filter(Prop > 0.01)
+    
+    colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
+    
   }
   return(dietcheck1)
 }

@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 3/21/2023
-# Code to create Fig. 2 for ECCWO poster
+# Code to create Fig. 2 for ICES paper
 # Fig. 2 biomass of groups that have the scalar, base run vs run with scalar (or relative, to each other, or something along those lines). Base this on the txt index files.
 
 # compare base to prod run
@@ -33,13 +33,13 @@ p_prod <- biom_all %>%
   filter(Code %in% c('ZM','PL')) %>%
   ggplot(aes(x = Time, y = rel_biomass, group = Run))+
   geom_line(aes(color = Run, linetype = Run), linewidth = 0.8)+
-  scale_color_manual(values = c('blue','orange'))+
+  scale_color_viridis_d(begin = 0.2, end = 0.8)+
   annotate("rect", xmin = 30, xmax = 35, ymin = -Inf, ymax = Inf,
-           alpha = .2, fill = 'red')+
+           alpha = .2, fill = 'yellow')+
   theme_bw()+
   labs(x = 'Year', y = 'Biomass relative to control')+
-  facet_wrap(~Name, ncol = 2)
+  facet_wrap(~Name, ncol = 1)
 p_prod
 
 ggsave(paste0('output/', 'relative_plankton_biomass_', run_base, '_vs_', run_prod, '.png'), 
-       p_prod, width = 8, height = 3)
+       p_prod, width = 5, height = 1.5, dpi = 600)

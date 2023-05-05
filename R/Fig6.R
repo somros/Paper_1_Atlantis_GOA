@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 4/3/2023
-# Code to create Fig. 6 for ECCWO poster
+# Code to create Fig. 6 for ICES paper
 # Fig. 6 changes in diets
 # all the extraction code is take from Owen and PY's code
 # Plot this ponly for full forcings (HW temperature and production)
@@ -25,8 +25,8 @@ diets_base <- read.table(paste0(dir_base, 'outputGOA0', run_base, '_testDietChec
 diets_hw <- read.table(paste0(dir_hw_prod, 'outputGOA0', run_hw_prod, '_testDietCheck.txt'), header = T)
 
 # apply function to get diet changes
-diets_base1 <- compare_diets(diets_base, prednames = pred_names, run = 'base', cohorts = FALSE)
-diets_hw1 <- compare_diets(diets_hw, prednames = pred_names, run = 'hw_prod', cohorts = FALSE)
+diets_base1 <- compare_diets(diets_base, prednames = pred_names, run = 'base', age_split = 'none')
+diets_hw1 <- compare_diets(diets_hw, prednames = pred_names, run = 'hw_prod', age_split = 'none')
 
 dietchange <- diets_base1 %>% 
   left_join(diets_hw1, by = c('Predator_Name','Cohort','Prey_Name')) %>%

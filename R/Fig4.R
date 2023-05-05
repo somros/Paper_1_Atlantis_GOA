@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 3/21/2023
-# Code to create Fig. 4 for ECCWO poster
+# Code to create Fig. 4 for ICES paper
 # Fig. 4 numbers at age
 # all the extraction code is take from Owen and PY's code
 
@@ -139,4 +139,4 @@ naa_hm <- ggplot()+
 naa_hm
 
 ggsave(paste0('output/', 'naa_relchange.png'),
-       naa_hm,width = 7.5,height=8.5)
+       naa_hm, width = 8, height=9, dpi=600)

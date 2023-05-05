@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 3/21/2023
-# Code to create Fig. 1 for ECCWO poster
+# Code to create Fig. 1 for ICES paper
 # Fig. 1 Atlantis GOA map, Temperature values in space, and trajectory for heat wave from ROMS hindcast, highlight the heatwave
 # Also plot CEATTLE bioenergetics and thermal windows from Aquamaps, to have it all in one place
 
@@ -74,7 +74,7 @@ p_ts <- temp_df %>%
   theme_bw()+
   labs(x = 'Year', y = 'SBT (\u00B0C)')
 p_ts
-ggsave(paste0('output/', 'goa_sbt_ts_', run_hw, '.png'), p_ts, width = 5, height = 2)
+ggsave(paste0('output/', 'goa_sbt_ts_', run_hw, '.png'), p_ts, width = 5, height = 1.2, dpi = 600)
 
 # # plot by box to compare with input files viewed in Shane's code
 temp_df %>%
@@ -123,7 +123,7 @@ p_delta_b <- ggplot()+
   theme_bw()+
   labs(fill = '\u0394SBT (\u00B0C)')
 p_delta_b
-ggsave(paste0('output/', 'goa_delta_sbt_', run_hw, '_vs_', run_base, '.png'), p_delta_b, width = 8, height = 3)
+ggsave(paste0('output/', 'goa_delta_sbt_', run_hw, '_vs_', run_base, '.png'), p_delta_b, width = 6, height = 2.5, dpi = 600)
 
 # plot summer temps
 # surface
@@ -199,7 +199,7 @@ p_q10 <- tcorr_frame_long %>%
   labs(x = 'Temperature (\u00B0C)', 'Tcorr')
 
 p_q10
-ggsave('output/CEATTLE_bioenergetics.png', p_q10, width = 4, height = 2)
+ggsave('output/CEATTLE_bioenergetics.png', p_q10, width = 4.5, height = 2, dpi = 300)
 
 
 # AQUAMPAS ----------------------------------------------------------------
@@ -243,12 +243,15 @@ dat2 <- do.call("rbind", replicate(length(temp), dat1, simplify = FALSE)) %>%
   mutate(temp = rep(temp, nrow(dat)))
 
 # apply function
-to_show <- c('Arrowtooth_flounder','Cod','Halibut','Pollock')
+to_show <- c('ATF','Cod','Pollock','Halibut')
 
 dat3 <- dat2 %>%
   mutate(niche = purrr::pmap(list(min_sp = mint, max_sp = maxt, current_enviro = temp), make_niche)) %>%
   unnest(cols = c('niche')) %>%
   select(Code, Name, mint, maxt, temp, niche)
+
+# ATF too long for poster
+dat3$Name <- gsub('Arrowtooth_flounder', 'ATF', dat3$Name)
 
 dat_vline <- dat3 %>%
   select(Code, Name, mint, maxt) %>%
@@ -266,5 +269,5 @@ p_niche <- dat3 %>%
   labs(x = 'Temperature (\u00B0C)', y = 'Scalar on abundance', color = '')+
   facet_wrap(~Name, ncol = 4)
 p_niche
-ggsave('output/thermal_niche_eccwo.png', p_niche, width = 8.5, height = 2)
+ggsave('output/thermal_niche_ices.png', p_niche, width = 6, height = 2.8, dpi = 600)
   
