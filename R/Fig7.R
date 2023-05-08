@@ -47,14 +47,16 @@ end_biom <- end_biom %>%
 
 # add group names
 end_biom <- end_biom %>%
-  left_join((biomass_groups) %>% select(Code, LongName), by = c('group' = 'Code'))
+  left_join((biomass_groups) %>% select(Code, Name, LongName), by = c('group' = 'Code')) %>%
+  left_join(guild_frame, by = c('Name'='fg'))
 
 # order by run and descending by effect
 end_biom <- end_biom %>%
-  arrange(run, change)
+  arrange(run, Guild, change)
 
 # fix factors
-end_biom$LongName <- factor(end_biom$LongName, levels = unique(end_biom$Name))
+end_biom$LongName <- factor(end_biom$LongName, levels = unique(end_biom$LongName))
+end_biom$Guild <- factor(end_biom$Guild, levels = unique(end_biom$Guild))
 
 # drop carrion
 end_biom <- end_biom %>% filter(LongName != 'Carrion')
@@ -63,6 +65,15 @@ end_biom <- end_biom %>% filter(LongName != 'Carrion')
 end_biom <- end_biom %>%
   rowwise() %>%
   mutate(for_color = ifelse(change < 0, 'neg', 'pos'))
+
+# make labels
+run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
+names(run_labs) <- c('hw_prod_to_base','hw_to_base','prod_to_base')
+
+# fudge guild labels to have them horizontal in the figure
+end_biom$Guild <- gsub(' ',
+                        '\n',
+                        end_biom$Guild)
 
 # plot
 p_biom <- ggplot(end_biom, aes(x=LongName, y=change, color = for_color)) + 
@@ -77,7 +88,8 @@ p_biom <- ggplot(end_biom, aes(x=LongName, y=change, color = for_color)) +
   theme_bw() +
   labs(x = '', y = '% change in biomass from base scenario') + 
   coord_flip()+
-  facet_wrap(~run)
+  facet_grid(Guild~run, scales = 'free_y', space = 'free_y', labeller = labeller(run = run_labs))+
+  theme(strip.text.y = element_text(angle = 0))
 p_biom
 
-ggsave('output/biom_change.png', p_biom, width = 7, height = 7.5)
+ggsave('output/biom_change.png', p_biom, width = 8.5, height = 8.5)

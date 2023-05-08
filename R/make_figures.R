@@ -50,6 +50,10 @@ biomass_groups <- bind_rows(vertebrate_groups,plankton_groups,bottom_groups,othe
 # add to grps df
 grps <- grps %>% left_join(biomass_groups)
 
+# read in guilds
+guild_frame <- read.csv('../data/fg_to_guild.csv')
+guild_frame <- guild_frame %>% mutate(fg = str_remove(fg, '_N'))
+
 # Model output: read NetCDF files
 # base run
 out_fl_base <- paste0(dir_base, 'outputGOA0', run_base, '_test.nc')

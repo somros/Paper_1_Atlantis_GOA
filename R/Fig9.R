@@ -3,8 +3,6 @@
 # Code to create Fig. 9 for ICES paper
 # Fig. 9 percent difference in numbers at age by age class (last 5 year average)
 
-guild_frame <- read.csv('../data/fg_to_guild.csv')
-guild_frame <- guild_frame %>% mutate(fg = str_remove(fg, '_N'))
 fg_to_plot <- vertebrate_groups %>% pull(Name) # all vertebrates groups
 
 naa_base <- bind_rows(purrr::map(fg_to_plot, plot_abun, out = out_base, this.nc = this_nc_base, run = 'base', spatial = FALSE))
