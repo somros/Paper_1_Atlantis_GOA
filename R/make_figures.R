@@ -15,16 +15,16 @@ gc()
 
 select <- dplyr::select
 
-run_base <- 1113 # this is the control run (no HW) we compare results to
-run_hw <- 1114 # just HW (temp) forcings
+run_base <- 1113 # this is the control run we compare results to
+run_warm <- 1114 # just warm (temp) forcings
 run_prod <- 1117 # just plankton prod scalar
-run_hw_prod <- 1115 # temp and plankton scalar - "true" heatwave scenario
+run_warm_prod <- 1115 # temp and plankton scalar - "true" heatwave scenario
 
 # set paths to directories
 dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
-dir_hw <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_hw, '/')
+dir_warm <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_warm, '/')
 dir_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_prod, '/')
-dir_hw_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_hw_prod, '/')
+dir_warm_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_warm_prod, '/')
 
 # Read files --------------------------------------------------------------
 # Geography: read bgm
@@ -59,18 +59,18 @@ guild_frame <- guild_frame %>% mutate(fg = str_remove(fg, '_N'))
 out_fl_base <- paste0(dir_base, 'outputGOA0', run_base, '_test.nc')
 out_base <- tidync(out_fl_base)
 this_nc_base <- ncdf4::nc_open(out_fl_base)
-# hw run
-out_fl_hw <- paste0(dir_hw, 'outputGOA0', run_hw, '_test.nc')
-out_hw <- tidync(out_fl_hw)
-this_nc_hw <- ncdf4::nc_open(out_fl_hw)
+# warm run
+out_fl_warm <- paste0(dir_warm, 'outputGOA0', run_warm, '_test.nc')
+out_warm <- tidync(out_fl_warm)
+this_nc_warm <- ncdf4::nc_open(out_fl_warm)
 # prod run
 out_fl_prod <- paste0(dir_prod, 'outputGOA0', run_prod, '_test.nc')
 out_prod <- tidync(out_fl_prod)
 this_nc_prod <- ncdf4::nc_open(out_fl_prod)
-# hw and prod run
-out_fl_hw_prod <- paste0(dir_hw_prod, 'outputGOA0', run_hw_prod, '_test.nc')
-out_hw_prod <- tidync(out_fl_hw_prod)
-this_nc_hw_prod <- ncdf4::nc_open(out_fl_hw_prod)
+# warm and prod run
+out_fl_warm_prod <- paste0(dir_warm_prod, 'outputGOA0', run_warm_prod, '_test.nc')
+out_warm_prod <- tidync(out_fl_warm_prod)
+this_nc_warm_prod <- ncdf4::nc_open(out_fl_warm_prod)
 
 # derived values for output
 depths <- out_base %>% hyper_filter(t=t==0) %>% hyper_tibble(select_var="dz") %>% dplyr::select(-t)
@@ -88,6 +88,21 @@ tyrs <- ts/(60*60*24*365)
 # # area of each box is the same as volume of the deepest depth layer, because the dz of that layer is 1
 areas <- volumes %>% filter(z==max(z)) %>% dplyr::select(b,volume) %>% rename(area=volume)
 
+# coast shapefile
+coast <- maps::map(database = 'worldHires', regions = c('USA','Canada'), plot = FALSE, fill=TRUE)
+
+coast_sf <- coast %>% 
+  st_as_sf(crs = 4326) %>% 
+  st_transform(crs = st_crs(goa_sf)) %>% 
+  st_combine() %>%
+  st_crop(goa_sf %>% st_bbox())
+
+# make boundary boxes grey
+goa_sf <- goa_sf %>% 
+  rowwise() %>%
+  mutate(botz = ifelse(boundary == TRUE, NA, botz)) %>%
+  ungroup()
+
 # produce plots
-file_plot_list <- list('eccwo_functions.R','Fig1.R', 'Fig2.R', 'Fig3.R', 'Fig4.R', 'Fig5.R', 'Fig6.R')
-sapply(file_plot_list, source)
+# file_plot_list <- list('eccwo_functions.R','Fig1.R', 'Fig2.R', 'Fig3.R', 'Fig4.R', 'Fig5.R', 'Fig6.R')
+# sapply(file_plot_list, source)

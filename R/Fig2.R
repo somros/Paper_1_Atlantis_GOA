@@ -1,7 +1,8 @@
 # Alberto Rovellini
 # 3/21/2023
 # Code to create Fig. 2 for ICES paper
-# Fig. 2 biomass of groups that have the scalar, base run vs run with scalar (or relative, to each other, or something along those lines). Base this on the txt index files.
+# Fig. 2 biomass of groups that have the scalar, base run vs run with scalar
+# Base this on the txt index files.
 
 # compare base to prod run
 biom_base <- read.table(paste0(dir_base, 'outputGOA0', run_base, '_testBiomIndx.txt'), header = T)

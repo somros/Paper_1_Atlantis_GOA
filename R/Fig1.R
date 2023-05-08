@@ -1,42 +1,38 @@
 # Alberto Rovellini
-# 3/21/2023
-# Code to create Fig. 1 for ICES paper
-# Fig. 1 Atlantis GOA map, Temperature values in space, and trajectory for heat wave from ROMS hindcast, highlight the heatwave
-# Also plot CEATTLE bioenergetics and thermal windows from Aquamaps, to have it all in one place
+# 5/8/2023
+# Code to create Introduction and Methods figures for ICES paper
+# 1. Atlantis GOA model domain
+# 2. Temperature values over time (mean for model domain)
+# 3. Delta temperature in space between warm and cold regimes
+# 4. Temperature across the model domain (seasonal averages)
+# 5. CEATTLE bioenergetics
+# 6. Thermal windows from Aquamaps
 
-coast <- maps::map(database = 'worldHires', regions = c('USA','Canada'), plot = FALSE, fill=TRUE)
+# Plot model domain -------------------------------------------------------
 
-coast_sf <- coast %>% 
-  st_as_sf(crs = 4326) %>% 
-  st_transform(crs = st_crs(goa_sf)) %>% 
-  st_combine() %>%
-  st_crop(goa_sf %>% st_bbox())
+p_geometry <- goa_sf %>%
+  ggplot()+
+  geom_sf(aes(fill=botz))+
+  #scale_fill_viridis()+
+  scale_fill_gradient(low='navyblue', high='cadetblue1')+
+  geom_sf(data=coast_sf, fill = 'grey')+
+  coord_sf()+
+  #geom_sf_text(aes(label=.bx0))+
+  theme_bw()+
+  labs(fill = 'Depth (m)')#, title = 'Spatial domain of Atlantis Gulf of Alaska')
+p_geometry
+ggsave(paste0('output/', 'goa_geometry.png'), p_geometry, width = 8, height = 3, dpi = 600)
 
-# make boundary boxes grey
-goa_sf <- goa_sf %>% 
-  rowwise() %>%
-  mutate(botz = ifelse(boundary == TRUE, NA, botz)) %>%
-  ungroup()
 
-# # plot
-# ggplot()+
-#   geom_sf(data = goa_sf, aes(fill = -botz))+
-#   scale_fill_viridis()+
-#   geom_sf(data = coast_sf)+
-#   theme_bw()
+# Plot time series of temperature in warm run -----------------------------
 
-# time series of temperature
-# compare a run with the HW temp forcing to the base run
-# use netcdf output from runs with real forcings, average per cell from 2000-2012 and 2013-2016
-# show surface and bottom
-
-# netcdf output file from hw run
-out_fl_hw <- paste0(dir_hw, 'outputGOA0', run_hw, '_test.nc')
-out_hw <- tidync(out_fl_hw)
-this_nc_hw <- ncdf4::nc_open(out_fl_hw)
+# netcdf output file from warm run
+out_fl_warm <- paste0(dir_warm, 'outputGOA0', run_warm, '_test.nc')
+out_warm <- tidync(out_fl_warm)
+this_nc_warm <- ncdf4::nc_open(out_fl_warm)
 
 # get temp
-temp_array_raw <- temp_array <- ncdf4::ncvar_get("Temp", nc=this_nc_hw)
+temp_array_raw <- temp_array <- ncdf4::ncvar_get("Temp", nc=this_nc_warm)
 
 dim_lyr <- dim(temp_array)[1]
 dim_box <- dim(temp_array)[2]
@@ -74,22 +70,31 @@ p_ts <- temp_df %>%
   theme_bw()+
   labs(x = 'Year', y = 'SBT (\u00B0C)')
 p_ts
-ggsave(paste0('output/', 'goa_sbt_ts_', run_hw, '.png'), p_ts, width = 5, height = 1.2, dpi = 600)
+ggsave(paste0('output/', 'goa_sbt_ts_', run_warm, '.png'), p_ts, width = 5, height = 1.2, dpi = 600)
 
 # # plot by box to compare with input files viewed in Shane's code
-temp_df %>%
-  dplyr::select(ts,box_id,lyr1) %>%
-  filter(ts <= 1) %>%
-  ggplot()+
-  geom_line(aes(x = ts, y = lyr1, color = factor(box_id)))#+
-  #guides(color = "none")
+# temp_df %>%
+#   dplyr::select(ts,box_id,lyr1) %>%
+#   filter(ts <= 1) %>%
+#   ggplot()+
+#   geom_line(aes(x = ts, y = lyr1, color = factor(box_id)))#+
+#   #guides(color = "none")
+
+
+# Spatial delta in temperature between cold and warm years ----------------
+
+# This works now because we are looping a cold year for 30 years and then a warm year for 20 years
+# So, we can compare within the same run (equivalent to comparing the last 20 years between warm and cold runs)
+
+spinup_length <- 30
+seas <- 0.6 # one of 0.2, 0.4, 0.6, 0.8, 1 if we use 73 days for the output frequency on run.prm
 
 temp_df <- temp_df %>%
   dplyr::select(ts,box_id,lyr1,sed) %>%
   pivot_longer(-c(ts,box_id), names_to = 'lyr', values_to = 'temp') %>%
   rowwise() %>%
-  mutate(period = ifelse(ts < 30 || ts >= 35, 'pre_hw', 'hw')) %>% # change these when we have the real forcings
-  filter(ts %in% seq(0.6,40,1)) %>% # this is July, for September use 0.8. This will matter for spatial patterns
+  mutate(period = ifelse(ts >= spinup_length, 'warm', 'cold')) %>% # change these when we have the real forcings
+  filter(ts %in% seq(seas,40,1)) %>% # this is July, for September use 0.8. This will matter for spatial patterns
   group_by(period, box_id, lyr) %>%
   summarize(mean_temp = mean(temp)) %>% # means by box per period (pre and during heatwave)
   ungroup()
@@ -102,7 +107,7 @@ goa_temp_sf <- goa_sf %>%
   ungroup() %>%
   dplyr::select(period, box_id, lyr, mean_temp) %>%
   pivot_wider(names_from = 'period', values_from = 'mean_temp') %>%
-  mutate(delta_temp = hw - pre_hw)
+  mutate(delta_temp = warm - cold)
 
 # plot delta
 # surface
@@ -113,7 +118,7 @@ p_delta_s <- ggplot()+
   theme_bw()+
   labs(fill = '\u0394SST (\u00B0C)')
 p_delta_s
-ggsave(paste0('output/', 'goa_delta_sst_', run_hw, '_vs_', run_base, '.png'), p_delta_s, width = 8, height = 3)
+ggsave(paste0('output/', 'goa_delta_sst_', run_warm, '_vs_', run_base, '.png'), p_delta_s, width = 8, height = 3)
 
 # bottom
 p_delta_b <- ggplot()+
@@ -123,29 +128,31 @@ p_delta_b <- ggplot()+
   theme_bw()+
   labs(fill = '\u0394SBT (\u00B0C)')
 p_delta_b
-ggsave(paste0('output/', 'goa_delta_sbt_', run_hw, '_vs_', run_base, '.png'), p_delta_b, width = 6, height = 2.5, dpi = 600)
+ggsave(paste0('output/', 'goa_delta_sbt_', run_warm, '_vs_', run_base, '.png'), p_delta_b, width = 6, height = 2.5, dpi = 600)
+
+
+# Plot seasonal average of seawater temperatures in space ---------------------------
 
 # plot summer temps
 # surface
 p_summer_s <- ggplot()+
-  geom_sf(data = goa_temp_sf %>% filter(lyr == 'lyr1'), aes(fill = hw))+
+  geom_sf(data = goa_temp_sf %>% filter(lyr == 'lyr1'), aes(fill = warm))+
   scale_fill_viridis()+
   geom_sf(data = coast_sf)+
   theme_bw()+
   labs(fill = 'Heatwave SST (\u00B0C)')
 p_summer_s
-ggsave(paste0('output/', 'goa_summer_sst_', run_hw, '_vs_', run_base, '.png'), p_summer_s, width = 8, height = 3)
+ggsave(paste0('output/', 'goa_summer_sst_', run_warm, '_vs_', run_base, '.png'), p_summer_s, width = 8, height = 3)
 
 # bottom
 p_summer_b <- ggplot()+
-  geom_sf(data = goa_temp_sf %>% filter(lyr == 'sed'), aes(fill = hw))+
+  geom_sf(data = goa_temp_sf %>% filter(lyr == 'sed'), aes(fill = warm))+
   scale_fill_viridis()+
   geom_sf(data = coast_sf)+
   theme_bw()+
   labs(fill = 'Heatwave SBT (\u00B0C)')
 p_summer_b
-ggsave(paste0('output/', 'goa_summer_sbt_', run_hw, '_vs_', run_base, '.png'), p_summer_b, width = 8, height = 3)
-
+ggsave(paste0('output/', 'goa_summer_sbt_', run_warm, '_vs_', run_base, '.png'), p_summer_b, width = 8, height = 3)
 
 # CEATTLE -----------------------------------------------------------------
 
@@ -204,7 +211,7 @@ ggsave('output/CEATTLE_bioenergetics.png', p_q10, width = 4.5, height = 2, dpi =
 
 # AQUAMPAS ----------------------------------------------------------------
 
-dat <- read.csv('../../GOA/Parametrization/thermal_responses/thermal_niches_aquamaps_0_100_percentiles.csv')
+dat <- read.csv('C:/Users/Alberto Rovellini/Documents/GOA/Parametrization/thermal_responses/thermal_niches_aquamaps_0_100_percentiles.csv')
 
 # added for AMSS 1/17/2023
 # Change COD, POL, ATF, HAL so that max is same as the maximum in the bioenergetics
@@ -258,6 +265,11 @@ dat_vline <- dat3 %>%
   filter(Name %in% to_show)%>%
   pivot_longer(-c(Code, Name), names_to = 'edge', values_to = 'temp')
 
+# rewrite edges
+dat_vline$edge <- gsub('mint', 'Minimum', dat_vline$edge)
+dat_vline$edge <- gsub('maxt', 'Maximum', dat_vline$edge)
+
+         
 # plot
 p_niche <- dat3 %>%
   filter(Name %in% to_show)%>%
@@ -269,5 +281,5 @@ p_niche <- dat3 %>%
   labs(x = 'Temperature (\u00B0C)', y = 'Scalar on abundance', color = '')+
   facet_wrap(~Name, ncol = 4)
 p_niche
-ggsave('output/thermal_niche_ices.png', p_niche, width = 6, height = 2.8, dpi = 600)
+ggsave('output/thermal_niche_groundfish.png', p_niche, width = 6, height = 2.5, dpi = 600)
   
