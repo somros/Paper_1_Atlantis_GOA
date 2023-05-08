@@ -120,7 +120,7 @@ for(i in 1:length(longnames)){
     scale_fill_viridis()+
     geom_sf(data = coast_sf)+
     theme_bw()+
-    labs(title = longnames[i], x='',y='',fill='Biomass\nproportion')
+    labs(title = '', x='',y='',fill='Biomass\nproportion')
   
     if(length(stg) > 1 & length(seas) == 1){
       

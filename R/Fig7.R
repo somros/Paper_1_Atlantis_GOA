@@ -47,17 +47,17 @@ end_biom <- end_biom %>%
 
 # add group names
 end_biom <- end_biom %>%
-  left_join((biomass_groups) %>% select(Code, Name), by = c('group' = 'Code'))
+  left_join((biomass_groups) %>% select(Code, LongName), by = c('group' = 'Code'))
 
 # order by run and descending by effect
 end_biom <- end_biom %>%
   arrange(run, change)
 
 # fix factors
-end_biom$Name <- factor(end_biom$Name, levels = unique(end_biom$Name))
+end_biom$LongName <- factor(end_biom$LongName, levels = unique(end_biom$Name))
 
 # drop carrion
-end_biom <- end_biom %>% filter(Name != 'Carrion')
+end_biom <- end_biom %>% filter(LongName != 'Carrion')
 
 # add color
 end_biom <- end_biom %>%
@@ -65,13 +65,13 @@ end_biom <- end_biom %>%
   mutate(for_color = ifelse(change < 0, 'neg', 'pos'))
 
 # plot
-p_biom <- ggplot(end_biom, aes(x=Name, y=change, color = for_color)) + 
+p_biom <- ggplot(end_biom, aes(x=LongName, y=change, color = for_color)) + 
   geom_hline(yintercept = 0, color = 'red') +
   geom_point(stat='identity', fill="black", size=2)  +
   geom_segment(aes(y = 0,
-                   x = Name,
+                   x = LongName,
                    yend = change,
-                   xend = Name, 
+                   xend = LongName, 
                    color = for_color)) +
   scale_color_viridis_d(begin = 0.2, end = 0.8) +
   theme_bw() +
@@ -81,4 +81,3 @@ p_biom <- ggplot(end_biom, aes(x=Name, y=change, color = for_color)) +
 p_biom
 
 ggsave('output/biom_change.png', p_biom, width = 7, height = 7.5)
-
