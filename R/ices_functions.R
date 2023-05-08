@@ -124,7 +124,7 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       summarise(across(KWT:DR, mean)) %>%
       ungroup() %>%
       mutate(Time = Time / 365) %>%
-      filter(Time >= (max(Time)-5)) %>% # focus on last 5 years of the run
+      filter(Time >= (max(Time)-5)) %>% # focus on last 5 years of the run TODO: make this flexible
       group_by(Predator) %>%
       summarise(across(KWT:DR, mean)) %>%
       ungroup() %>%
