@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 5/8/2023
-# Code to create a figure showing biomass differences at the end of the run between scenarios
+# Code to create a figure showing biomass differences at the end of the run between scenarios for ICES paper
 
 # dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
 # dir_warm <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_warm, '/')

@@ -62,6 +62,9 @@ preds_gtype <- setdiff((grps %>% pull(GroupType) %>% unique()), prods_gtype)
 # and corresponding codes
 pred_codes <- grps %>% filter(GroupType %in% preds_gtype) %>% pull(Code)
 
+# age class at maturity to split age classes between juveniles and adults
+agemat <- read.csv('../data/agemat.csv', header = T)
+
 # Model output: read NetCDF files
 # base run
 out_fl_base <- paste0(dir_base, 'outputGOA0', run_base, '_test.nc')
