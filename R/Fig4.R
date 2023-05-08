@@ -1,6 +1,6 @@
 # Alberto Rovellini
 # 5/8/2023
-# Code to create heatmaps of relative change in numbers at age over time
+# Code to create heatmaps of relative change in numbers at age over time for ICES paper
 # Keeping older code for absolute dynamics too
 # all the extraction code is take from Owen and PY's code
 # 1. Temporal dynamics of numbers at age

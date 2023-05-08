@@ -1,12 +1,12 @@
 # Alberto Rovellini
 # 5/8/2023
-# Code to create spatial maps of changes in numbers at age between two runs
+# Code to create spatial maps of changes in numbers at age between two runs for ICES paper
 # all the extraction code is take from Owen and PY's code
-# only plot spatial for full model, with thermal warm forcings as well as plankton
 
 # apply naa plotting function
 
 # pick groups to plot
+# as a note, be careful with what these are: pick forage and groundfish and you will be talking about heatwave stuff
 fg_to_plot <- c('Capelin',  
                 'Arrowtooth_flounder',
                 'Sandlance', 

@@ -54,6 +54,14 @@ grps <- grps %>% left_join(biomass_groups)
 guild_frame <- read.csv('../data/fg_to_guild.csv')
 guild_frame <- guild_frame %>% mutate(fg = str_remove(fg, '_N'))
 
+# producers and detritus
+prods_gtype <- c('PHYTOBEN', 'LG_PHY', 'SM_PHY', 'SED_BACT', 'PL_BACT', 'CARRION', 'LAB_DET', 'REF_DET')
+# predators:
+preds_gtype <- setdiff((grps %>% pull(GroupType) %>% unique()), prods_gtype)
+
+# and corresponding codes
+pred_codes <- grps %>% filter(GroupType %in% preds_gtype) %>% pull(Code)
+
 # Model output: read NetCDF files
 # base run
 out_fl_base <- paste0(dir_base, 'outputGOA0', run_base, '_test.nc')

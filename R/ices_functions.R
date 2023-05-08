@@ -124,18 +124,18 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       summarise(across(KWT:DR, mean)) %>%
       ungroup() %>%
       mutate(Time = Time / 365) %>%
-      filter(Time >= 30 & Time < 35) %>% # focus on hw years only
+      filter(Time >= (max(Time)-5)) %>% # focus on last 5 years of the run
       group_by(Predator) %>%
       summarise(across(KWT:DR, mean)) %>%
       ungroup() %>%
       pivot_longer(-Predator, names_to = 'Prey', values_to = 'Prop') %>%
-      left_join((grps %>% select(Code, Name)), by = c('Predator'='Code')) %>%
-      rename(Predator_Name = Name) %>%
+      left_join((grps %>% select(Code, Name, LongName)), by = c('Predator'='Code')) %>%
+      rename(Predator_Name = Name, Predator_LongName = LongName) %>%
       select(-Predator) %>%
-      left_join((grps %>% select(Code, Name)), by = c('Prey'='Code')) %>%
-      rename(Prey_Name = Name) %>%
+      left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
+      rename(Prey_Name = Name, Prey_LongName = LongName) %>%
       mutate(Cohort = NA) %>% # add empty cohort variable
-      select(Prop, Predator_Name, Cohort, Prey_Name)%>%
+      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)%>%
       filter(Prop > 0.01)
 
       colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
@@ -145,29 +145,29 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
     dietcheck1 <- dietcheck %>%
       filter(Predator %in% preds_to_keep & Updated == 0) %>% # IDK what Updated means but it seems to pertain the last time step only
       mutate(Time = Time / 365) %>%
-      filter(Time >= 30 & Time < 35) %>% # focus on hw years only
+      filter(Time >= (max(Time)-5)) %>% # focus on last 5 years of the run
       group_by(Predator, Cohort) %>%
       summarise(across(KWT:DR, mean)) %>%
       ungroup() %>%
       mutate(Cohort = Cohort + 1) %>%
       pivot_longer(-c(Predator, Cohort), names_to = 'Prey', values_to = 'Prop') %>%
-      left_join((grps %>% select(Code, Name)), by = c('Predator'='Code')) %>%
-      rename(Predator_Name = Name) %>%
+      left_join((grps %>% select(Code, Name, LongName)), by = c('Predator'='Code')) %>%
+      rename(Predator_Name = Name, Predator_LongName = LongName) %>%
       select(-Predator) %>%
-      left_join((grps %>% select(Code, Name)), by = c('Prey'='Code')) %>%
-      rename(Prey_Name = Name) %>%
-      select(Prop, Predator_Name, Cohort, Prey_Name)%>%
+      left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
+      rename(Prey_Name = Name, Prey_LongName = LongName) %>%
+      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)%>%
       filter(Prop > 0.01)
     
       colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
       
   } else {
     
-    # we use this otpion for the plot for the last 5 year average by age class and all predators, can also place this in another function
+    # we use this option for the plot for the last 5 year average by age class and all predators, can also place this in another function
     
     dietcheck1 <- dietcheck %>%
       mutate(Time = Time / 365) %>%
-      filter(Time >= (max(Time)-5)) %>% # focus on hw years only
+      filter(Time >= (max(Time)-5)) %>% # focus on last 5 years of the run
       left_join(agemat, by = c('Predator' = 'Code')) %>%
       rowwise() %>%
       mutate(Stage = ifelse(is.na(agemat), 1, ifelse(Cohort < agemat, 0, 1))) %>%
@@ -176,12 +176,12 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       summarise(across(KWT:DR, mean)) %>%
       ungroup() %>%
       pivot_longer(-c(Predator, Stage), names_to = 'Prey', values_to = 'Prop') %>%
-      left_join((grps %>% select(Code, Name)), by = c('Predator'='Code')) %>%
-      rename(Predator_Name = Name) %>%
+      left_join((grps %>% select(Code, Name, LongName)), by = c('Predator'='Code')) %>%
+      rename(Predator_Name = Name, Predator_Longname = LongName) %>%
       select(-Predator) %>%
-      left_join((grps %>% select(Code, Name)), by = c('Prey'='Code')) %>%
-      rename(Prey_Name = Name) %>%
-      select(Prop, Predator_Name, Stage, Prey_Name)%>%
+      left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
+      rename(Prey_Name = Name, Prey_Longname = LongName) %>%
+      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)%>%
       filter(Prop > 0.01)
     
     colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
