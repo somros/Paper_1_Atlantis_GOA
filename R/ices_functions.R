@@ -47,7 +47,8 @@ plot_wage_timeseries <- function(fg, out, this.nc, run){
       group_by(year, age_group, age) %>%
       summarise(weight = mean(weight)) %>%
       ungroup() %>%
-      mutate(Name = fg_atts$Name)
+      mutate(Name = fg_atts$Name,
+             LongName = fg_atts$LongName)
     
     colnames(rnsn_summ)[4] <- paste('weight', run, sep = '_')
     
@@ -85,7 +86,8 @@ plot_abun <- function(fg, out, this.nc, run, spatial = FALSE){
       group_by(year, age_group, age) %>%
       summarise(abun = mean(abun)) %>%
       ungroup() %>%
-      mutate(Name = fg_atts$Name)
+      mutate(Name = fg_atts$Name,
+             LongName = fg_atts$LongName)
     
     colnames(abun2)[4] <- paste('abun', run, sep = '_')
     
@@ -101,7 +103,8 @@ plot_abun <- function(fg, out, this.nc, run, spatial = FALSE){
     abun2 <- abun1 %>% 
       pivot_longer(-t, names_to = 'box_id', values_to = 'n') %>%
       filter(t > 0) %>% 
-      mutate(Name = fg_atts$Name)
+      mutate(Name = fg_atts$Name,
+             LongName = fg_atts$LongName)
     
     colnames(abun2)[3] <- paste('abun', run, sep = '_')
       

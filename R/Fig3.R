@@ -45,8 +45,7 @@ waa_warm_prod <- bind_rows(purrr::map(fg_to_plot, plot_wage_timeseries, out = ou
 #   theme_bw()+
 #   facet_grid2(run ~ LongName, scales = 'free_y', independent = 'y', labeller = labeller(run = run_labs))
 # p
-# ggsave(paste0('output/', 'waa_', run_base, '_vs_', run_warm, '.png'),
-#        p,width = 12,height=5)
+# ggsave(paste0('output/', 'waa_time_series.png'), p,width = 13,height=5)
 
 
 # Heatmaps of relative difference in WAA over time ------------------------
