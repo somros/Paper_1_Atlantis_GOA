@@ -86,9 +86,6 @@ ggsave(paste0('output/', 'goa_sbt_ts_', run_warm, '.png'), p_ts, width = 5, heig
 # This works now because we are looping a cold year for 30 years and then a warm year for 20 years
 # So, we can compare within the same run (equivalent to comparing the last 20 years between warm and cold runs)
 
-spinup_length <- 30
-seas <- 0.6 # one of 0.2, 0.4, 0.6, 0.8, 1 if we use 73 days for the output frequency on run.prm
-
 temp_df <- temp_df %>%
   dplyr::select(ts,box_id,lyr1,sed) %>%
   pivot_longer(-c(ts,box_id), names_to = 'lyr', values_to = 'temp') %>%
