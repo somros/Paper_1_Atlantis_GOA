@@ -118,5 +118,18 @@ goa_sf <- goa_sf %>%
   ungroup()
 
 # produce plots
-# file_plot_list <- list('eccwo_functions.R','Fig1.R', 'Fig2.R', 'Fig3.R', 'Fig4.R', 'Fig5.R', 'Fig6.R')
-# sapply(file_plot_list, source)
+file_plot_list <- list('eccwo_functions.R',
+                       'fig_intro_methods.R',
+                       'fig_biomass_changes.R',
+                       #'fig_catch_changes.R', # to run this you need to have all results from the same set of runs
+                       'fig_waa_hm_static.R',
+                       'fig_naa_hm_static.R',
+                       #'fig_waa_hm_temporal.R', # these made more sense for the HW stuff
+                       #'fig_naa_hm_temporal.R', # these made more sense for the HW stuff
+                       'fig_spatial_naa.R', 
+                       'fig_diets_changes.R'#,
+                       #'fig_s_appendix.R',
+                       #'fig_dietcomp_appendix.R'
+                       )
+
+sapply(file_plot_list, source)
