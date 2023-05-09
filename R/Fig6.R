@@ -2,7 +2,11 @@
 # 5/8/2023
 # Code to create a figure illustrating changes in diets between runs for the ICES paper
 # 1. Barchart for selected predators and prey
+# 2. heat,ap for all functional groups by guild
 # all the extraction code is take from Owen and PY's code
+
+
+# Barchart of selected groups ---------------------------------------------
 
 # these are the predators of interest for this plot (Codes)
 preds_to_keep <- c('CAP','SAN','HER','ATF','POL','COD','BDF','BSF')

@@ -1,3 +1,8 @@
+# Alberto Rovellini
+# 5/8/2023 
+# list of functions that manipulate Atlantis run output and create figures for the ICES paper
+
+# function that extracts weight at age from NepCDF files
 plot_wage_timeseries <- function(fg, out, this.nc, run){
   # get the attributes associated with each functional group
   fg_atts <- grps %>% filter(Name==fg)
@@ -56,6 +61,7 @@ plot_wage_timeseries <- function(fg, out, this.nc, run){
   }
 }
 
+# function that extracts abundance from NetCDF files
 plot_abun <- function(fg, out, this.nc, run, spatial = FALSE){
   
   # if the species is TURNED OFF, return an empty plot
@@ -113,7 +119,7 @@ plot_abun <- function(fg, out, this.nc, run, spatial = FALSE){
   return(abun2)
 }
 
-# reshape diets and compare between the periods
+# function that reshapes diets and compare between the periods
 compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
   
   if(age_split == 'none'){
@@ -189,6 +195,72 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
   }
   return(dietcheck1)
 }
+
+# function that checks if: 
+# 1. there are seasonal differences within stages, if not collapse into one
+# 2. there are ontogenetic differences, if not collapse into one
+
+handle_dists <- function(this_species, isvert = TRUE){
+  
+  print(paste('Doing', this_species, sep = " "))
+  
+  # work on one species at a time
+  dat <- dists_long %>% filter(name == this_species)
+  
+  # within a stage, check if vectors are identical across seasons (expect this to be the case for the vast majority)
+  if(isvert){
+    stgs <- c('J','A')
+  } else {
+    stgs <- 'A'
+  }
+  
+  drop_seas <- rep(NA, length(stgs))
+  
+  for(stg in 1:length(stgs)){
+    
+    dat1 <- dat %>%
+      filter(stage == stgs[stg]) %>%
+      pivot_wider(id_cols = box_id, names_from = seas, values_from = value)
+    
+    drop_seas[stg] <- all(sapply(list(dat1$S2, dat1$S3, dat1$S4), FUN = identical, dat1$S1))
+    
+  }
+  
+  # within a season, see if there are ontogenetic differences
+  # only for vertebrates
+  if(isvert){
+    
+    seas <- c('S1','S2','S3','S4')
+    drop_stage <- rep(NA, length(seas))
+    
+    for(s in 1:length(seas)){
+      
+      dat1 <- dat %>%
+        filter(seas == seas[s]) %>%
+        pivot_wider(id_cols = box_id, names_from = stage, values_from = value)
+      
+      drop_stage[s] <- identical(dat1$A, dat1$J)
+      
+    }
+    
+  } else {
+    drop_stage <- TRUE
+  }
+  
+  # if all seasons identical keep only S3
+  if(all(drop_seas)){
+    dat2 <- dat %>% filter(seas == 'S3') %>% mutate(seas = 'All seasons')
+  } else {
+    dat2 <- dat
+  }
+  if(all(drop_stage)){
+    dat3 <- dat2 %>% filter(stage == 'A') %>% mutate(stage = 'All stages')
+  } else {
+    dat3 <- dat2
+  }
+  
+  return(dat3)
+} 
 
 # function to set values in the boundary boxes to NA
 setNA <- function(mat) {

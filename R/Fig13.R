@@ -1,10 +1,10 @@
 # Alberto Rovellini
 # 5/8/2023
-# plot differences in terminal catch (5y avg) among scenarios
+# plot differences in terminal catch (5y avg) among scenarios for ICES paper
 # Since we impose F at relatively low levels, I do not expect this to be much different among runs
-# 
 
 # pick run
+# this will go away when we have real runs  - for now HW experiment runs do not have catch
 run_base <- 1210
 run_hw <- 1211
 run_prod <- 1212

@@ -1,6 +1,9 @@
 # Alberto Rovellini 
 # 5/6/2023
-# Making plots of spatial distributions for all species to put in the document
+# Making plots of spatial distributions for all species to put in the appendix to the ICES paper
+# This is based on S1-S4 and will only provide relative distributions instead of predicitons of biomass / CPUE
+# This code should facet plots appropriately depedning on the number of seasons and stages we have different S values for
+# This will be run-independent to a good extent, but if we update the distributions (for example by including winter maps) need to update this too
 
 # read S1-S4
 dists_vert <- read.csv('../../Parametrization/build_init_prm_10COHORTS/data/seasonal_distribution_POP.csv')
@@ -24,72 +27,7 @@ dists_long <- dists_long %>%
 vertnames <- intersect(vertebrate_groups %>% pull(Name), unique(dists_long$name))
 invertnames <- intersect(setdiff((grps %>% pull(Name)), vertnames), unique(dists_long$name))
 
-# make function that checks if: 
-# 1. there are seasonal differences within stages, if not collapse into one
-# 2. there are ontogenetic differences, if not collapse into one
-
-handle_dists <- function(this_species, isvert = TRUE){
-  
-  print(paste('Doing', this_species, sep = " "))
-  
-  # work on one species at a time
-  dat <- dists_long %>% filter(name == this_species)
-  
-  # within a stage, check if vectors are identical across seasons (expect this to be the case for the vast majority)
-  if(isvert){
-    stgs <- c('J','A')
-  } else {
-    stgs <- 'A'
-  }
-  
-  drop_seas <- rep(NA, length(stgs))
-  
-  for(stg in 1:length(stgs)){
-    
-    dat1 <- dat %>%
-      filter(stage == stgs[stg]) %>%
-      pivot_wider(id_cols = box_id, names_from = seas, values_from = value)
-    
-    drop_seas[stg] <- all(sapply(list(dat1$S2, dat1$S3, dat1$S4), FUN = identical, dat1$S1))
-    
-  }
-  
-  # within a season, see if there are ontogenetic differences
-  # only for vertebrates
-  if(isvert){
-    
-    seas <- c('S1','S2','S3','S4')
-    drop_stage <- rep(NA, length(seas))
-    
-    for(s in 1:length(seas)){
-      
-      dat1 <- dat %>%
-        filter(seas == seas[s]) %>%
-        pivot_wider(id_cols = box_id, names_from = stage, values_from = value)
-      
-      drop_stage[s] <- identical(dat1$A, dat1$J)
-      
-    }
-    
-  } else {
-    drop_stage <- TRUE
-  }
-  
-  # if all seasons identical keep only S3
-  if(all(drop_seas)){
-    dat2 <- dat %>% filter(seas == 'S3') %>% mutate(seas = 'All seasons')
-  } else {
-    dat2 <- dat
-  }
-  if(all(drop_stage)){
-    dat3 <- dat2 %>% filter(stage == 'A') %>% mutate(stage = 'All stages')
-  } else {
-    dat3 <- dat2
-  }
-  
-  return(dat3)
-} 
-
+# apply function to drop duplicated distributions
 vertsp <- bind_rows(lapply(vertnames, handle_dists, isvert = TRUE))
 invertsp <- bind_rows(lapply(invertnames, handle_dists, isvert = FALSE))
 allsp <- rbind(vertsp, invertsp)
@@ -139,26 +77,3 @@ for(i in 1:length(longnames)){
       
     }
 }
-
-
-# now make plots
-# plotgrid <- function(df,name){
-#   ggplot(df)+
-#     geom_sf(aes(fill=S), color=NA)+
-#     scale_fill_viridis()+
-#     theme_bw()+
-#     labs(title = name, x='Lon',y='Lat',fill='S')
-# }
-# 
-# nested_tmp <- atlantis_box %>% select(box_id) %>%
-#   full_join(all_groups,by='box_id') %>%
-#   mutate(groupstage=paste0(group,stage)) %>%
-#   group_by(groupstage) %>%
-#   nest() %>%
-#   mutate(plots = purrr::map2(data, groupstage, plotgrid))
-# 
-# gridExtra::grid.arrange(grobs = nested_tmp$plots, ncol = 2) # for doc
-# 
-# #for saving
-# p <- gridExtra::arrangeGrob(grobs = nested_tmp$plots, ncol = 2)
-# ggsave(paste(outdir, 's1_s4_GOA_V3.png', sep = '/'),p,width=10,height = 60,limitsize=F)

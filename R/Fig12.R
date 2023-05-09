@@ -1,7 +1,8 @@
-# plot and produce tables for the methods
-library(tidyverse)
-library(viridis)
-library(RColorBrewer)
+# Alberto Rovellini
+# 5/8/2023
+# Code to generate plots of the diets of each functional group, as they are entered in the PPREY matrix of a run of choice
+# To be used in the section of the text (appendix) for each individual group
+# Also keeping the code to produce the full heatmap
 
 # pick run
 this_run <- 1190
@@ -17,9 +18,6 @@ last_row <- pprey_rows[length(pprey_rows)]+2 # adding the vector of values and t
 
 # read the pprey matrix
 pprey_matrix <- prm[first_row:last_row]
-
-# alternatively, read pprey matrix directly
-# pprey_matrix <- readLines( paste0('out_', this_run, '/pprey_new/pprey_newtmp.prm'))
 
 pprey_names <- pprey_matrix[grep('pPREY', pprey_matrix)] # get name rows
 pprey_vals <- pprey_matrix[-grep('pPREY', pprey_matrix)] # get value rows
@@ -61,36 +59,6 @@ val_frame1 <- val_frame2 <- val_frame %>% mutate(pprey = pprey_names,
 vertnames <- vertebrate_groups %>% pull(LongName)
 invertnames <- setdiff((grps %>% pull(LongName)), vertnames)
 
-
-#diets <- read.csv('../data/goa_pprey_matrix.csv')
-
-# diets %>%
-#   filter(grepl('RFD',name)) %>%
-#   select(name,SBF)
-
-# plot
-# diets <- diets %>%
-#   mutate(tmp = substr(name, 6, (nchar(name)-3))) %>%
-#   rowwise() %>%
-#   mutate(Prey_stage = ifelse(substr(tmp,1,1) == '1', 1, ifelse(substr(tmp,1,1) == '2', 2, NA)),
-#          Pred_stage = ifelse(substr(tmp,nchar(tmp),nchar(tmp)) == '1', 1, ifelse(substr(tmp,nchar(tmp),nchar(tmp)) == '2', 2, NA)),
-#          Pred_name = ifelse(substr(tmp,1,1) %in% c('1','2'), substr(tmp,2,4), tmp)) %>%
-#   select(Pred_name, Pred_stage, Prey_stage, KWT:DRsed) 
-
-# reconstruct invertebrate diets
-# diets_inv_tmp <- diets %>% filter(is.na(Pred_stage))
-# 
-# diets_inv <- diets_inv_tmp[rep(seq_len(nrow(diets_inv_tmp)), each = 4), ]
-# diets_inv$Pred_stage <- rep(c(1,2), nrow(diets_inv_tmp)*2)
-# diets_inv$Prey_stage <- rep(c(1,1,2,2), nrow(diets_inv_tmp))
-# 
-# # and now bring together
-# diets <- rbind(diets %>% filter(!is.na(Pred_stage)), diets_inv) %>% as_tibble()
-
-# diets %>%
-#   filter(Pred_name == "RFD") %>%
-#   select(Pred_name:Prey_stage, SBF)
-
 diets <- val_frame1
 diets <- diets %>% mutate(pred_stage = replace_na(pred_stage, 2),
                           prey_stage = replace_na(prey_stage, 2)) %>%
@@ -103,9 +71,7 @@ diets_long <- diets %>%
   ungroup() %>%
   mutate(Stage = paste0('Prey', prey_stage, ':Predator', pred_stage))
          
-
 # attach long names
-
 diets_long <- diets_long %>%
   left_join(grps %>% select(Code, LongName), by = c('Pred_name' = 'Code')) %>%
   left_join(grps %>% select(Code, LongName), by = c('Prey_name' = 'Code')) %>%
@@ -113,6 +79,9 @@ diets_long <- diets_long %>%
   rename(Pred_name = LongName.x, Prey_name = LongName.y) %>%
   mutate(Prop = na_if(Prop, 0)) %>%
   filter(!is.na(Prey_name))
+
+
+# All groups heatmap ------------------------------------------------------
 
 # p <- diets_long %>% ggplot()+
 #   geom_tile(aes(x = Prey_name, y = Pred_name, fill = Prop), color = 'darkgrey')+
