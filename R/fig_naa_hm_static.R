@@ -2,6 +2,8 @@
 # 5/8/2023
 # Code to create heatmap of percent difference in numbers at age by age class (last 5 year average) for ICES paper
 
+print('Doing fig_naa_hm_static.R')
+
 # apply naa plotting function
 # rerun this because the fg to plot are different than from the previous heatmap
 naa_base <- bind_rows(purrr::map(fg_to_plot, plot_abun, out = out_base, this.nc = this_nc_base, run = 'base', spatial = FALSE))
@@ -31,7 +33,7 @@ naa_heatmap$age_group <- factor(naa_heatmap$age_group,
 
 # fix order of run
 naa_heatmap$run <- factor(naa_heatmap$run, 
-                          levels = c('abun_warm_prod','abun_warm','abun_prod'))
+                          levels = c('abun_warm','abun_prod','abun_warm_prod'))
 
 # add guild for facets 
 naa_heatmap <- naa_heatmap %>%
@@ -56,16 +58,17 @@ naa_heatmap_5y <- naa_heatmap %>%
 
 # plot
 naa_hm <- naa_heatmap_5y %>%
-  filter(Name != 'Salmon_pink') %>%
+  filter(Name %in% fg_to_plot) %>%
+  #filter(Name != 'Salmon_pink', Name != 'Skate_big') %>%
   ggplot()+
-  geom_tile(aes(x = age, y = Name, fill = percent_change))+
+  geom_tile(aes(x = age, y = LongName, fill = percent_change))+
   scale_fill_viridis()+
   theme_bw()+
   scale_x_continuous(breaks = 1:10)+
-  labs(x = 'Age class', y = '', fill = '%', title = 'Relative change in numbers at age from control run')+
+  labs(x = 'Age class', y = '', fill = '%')+#, title = 'Relative change in numbers at age from control run')+
   facet_grid(Guild~run, scales = 'free_y', space = 'free_y', labeller = labeller(run = run_labs))+
   theme(strip.text.y = element_text(angle = 0))
 naa_hm
 
-ggsave(paste0('output/', 'naa_relchange_5y.png'),
-       naa_hm, width = 8, height=9, dpi = 600)
+ggsave(paste0('output/', now, '/naa_relchange_5y.png'),
+       naa_hm, width = 7.5, height=7.5, dpi = 600)

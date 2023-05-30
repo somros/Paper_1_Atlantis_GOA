@@ -5,6 +5,7 @@
 # 2. heat,ap for all functional groups by guild
 # all the extraction code is take from Owen and PY's code
 
+print('Doing fig_diet_changes.R')
 
 # Barchart of selected groups ---------------------------------------------
 
@@ -67,7 +68,7 @@ p_diet <- dietchange %>%
   facet_wrap(Predator_Guild~Predator_LongName, scales = 'free_x')
 p_diet
 
-ggsave(paste0('output/', 'diets_change_', control, '_vs_', experiment,'.png'),
+ggsave(paste0('output/', now, '/diets_change_', control, '_vs_', experiment,'.png'),
        p_diet,width = 6.5,height=5)  
 
 # All groups heatmap ------------------------------------------------------
@@ -135,7 +136,7 @@ p_dietchange_verts_5y <- dietchange %>%
 
 p_dietchange_verts_5y
 
-ggsave(paste0('output/', 'diets_change_5y_', run_base, '_vs_', run_warm,'.png'),
+ggsave(paste0('output/', now, '/diets_change_5y_', run_base, '_vs_', run_warm,'.png'),
        p_dietchange_verts_5y, width = 13,height=11)  
 
 # this plot highlights that predation is really low on some groups

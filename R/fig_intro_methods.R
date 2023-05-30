@@ -8,6 +8,8 @@
 # 5. CEATTLE bioenergetics
 # 6. Thermal windows from Aquamaps
 
+print('Doing fig_intro_methods.R')
+
 # Plot model domain -------------------------------------------------------
 
 p_geometry <- goa_sf %>%
@@ -21,7 +23,7 @@ p_geometry <- goa_sf %>%
   theme_bw()+
   labs(fill = 'Depth (m)')#, title = 'Spatial domain of Atlantis Gulf of Alaska')
 p_geometry
-ggsave(paste0('output/', 'goa_geometry.png'), p_geometry, width = 8, height = 3, dpi = 600)
+ggsave(paste0('output/', now, '/goa_geometry.png'), p_geometry, width = 8, height = 3, dpi = 600)
 
 
 # Plot time series of temperature in warm run -----------------------------
@@ -70,7 +72,7 @@ p_ts <- temp_df %>%
   theme_bw()+
   labs(x = 'Year', y = 'SBT (\u00B0C)')
 p_ts
-ggsave(paste0('output/', 'goa_sbt_ts_', run_warm, '.png'), p_ts, width = 5, height = 1.2, dpi = 600)
+ggsave(paste0('output/', now, '/goa_sbt_ts_', run_warm, '.png'), p_ts, width = 5, height = 1.2, dpi = 600)
 
 # # plot by box to compare with input files viewed in Shane's code
 # temp_df %>%
@@ -93,7 +95,7 @@ temp_df <- temp_df %>%
   mutate(period = ifelse(ts >= spinup_length, 'warm', 'cold')) %>% # change these when we have the real forcings
   filter(ts %in% seq(seas,40,1)) %>% # this is July, for September use 0.8. This will matter for spatial patterns
   group_by(period, box_id, lyr) %>%
-  summarize(mean_temp = mean(temp)) %>% # means by box per period (pre and during heatwave)
+  summarize(mean_temp = mean(temp)) %>% # means by box per period (pre and during warm period)
   ungroup()
 
 # now join to spatial data set
@@ -115,7 +117,7 @@ p_delta_s <- ggplot()+
   theme_bw()+
   labs(fill = '\u0394SST (\u00B0C)')
 p_delta_s
-ggsave(paste0('output/', 'goa_delta_sst_', run_warm, '_vs_', run_base, '.png'), p_delta_s, width = 8, height = 3)
+ggsave(paste0('output/', now, '/goa_delta_sst_', run_warm, '_vs_', run_base, '.png'), p_delta_s, width = 8, height = 3, dpi = 600)
 
 # bottom
 p_delta_b <- ggplot()+
@@ -125,7 +127,7 @@ p_delta_b <- ggplot()+
   theme_bw()+
   labs(fill = '\u0394SBT (\u00B0C)')
 p_delta_b
-ggsave(paste0('output/', 'goa_delta_sbt_', run_warm, '_vs_', run_base, '.png'), p_delta_b, width = 6, height = 2.5, dpi = 600)
+ggsave(paste0('output/', now, '/goa_delta_sbt_', run_warm, '_vs_', run_base, '.png'), p_delta_b, width = 8, height = 3, dpi = 600)
 
 
 # Plot seasonal average of seawater temperatures in space ---------------------------
@@ -137,9 +139,9 @@ p_summer_s <- ggplot()+
   scale_fill_viridis()+
   geom_sf(data = coast_sf)+
   theme_bw()+
-  labs(fill = 'Heatwave SST (\u00B0C)')
+  labs(fill = 'Warm period SST (\u00B0C)')
 p_summer_s
-ggsave(paste0('output/', 'goa_summer_sst_', run_warm, '_vs_', run_base, '.png'), p_summer_s, width = 8, height = 3)
+ggsave(paste0('output/', now, '/goa_summer_sst_', run_warm, '_vs_', run_base, '.png'), p_summer_s, width = 8, height = 3)
 
 # bottom
 p_summer_b <- ggplot()+
@@ -147,9 +149,9 @@ p_summer_b <- ggplot()+
   scale_fill_viridis()+
   geom_sf(data = coast_sf)+
   theme_bw()+
-  labs(fill = 'Heatwave SBT (\u00B0C)')
+  labs(fill = 'Warm period SBT (\u00B0C)')
 p_summer_b
-ggsave(paste0('output/', 'goa_summer_sbt_', run_warm, '_vs_', run_base, '.png'), p_summer_b, width = 8, height = 3)
+ggsave(paste0('output/', now, '/goa_summer_sbt_', run_warm, '_vs_', run_base, '.png'), p_summer_b, width = 8, height = 3)
 
 
 # Productivity forcings ---------------------------------------------------
@@ -177,25 +179,25 @@ biom_prod_long <- biom_prod %>%
 biom_all <- biom_base_long %>%
   left_join(biom_prod_long, by = c('Time','Code','Name')) %>%
   mutate(Control = mt_base / mt_base,
-         `Heat wave` = mt_prod / mt_base) %>%
-  select(Time, Code, Name, Control, `Heat wave`) %>%
+         Warm = mt_prod / mt_base) %>%
+  select(Time, Code, Name, Control, Warm) %>%
   pivot_longer(-c(Time, Code, Name), names_to = 'Run', values_to = 'rel_biomass')
 
 # plot biomass over time, keep only plankton groups that we are changing
 p_prod <- biom_all %>%
-  filter(Code %in% c('ZM','PL')) %>%
+  filter(Code %in% c('PL','ZM','EUP')) %>%  # c('PL','PS','ZL','ZM', 'ZS','EUP')
   ggplot(aes(x = Time, y = rel_biomass, group = Run))+
   geom_line(aes(color = Run, linetype = Run), linewidth = 0.8)+
   scale_color_viridis_d(begin = 0.2, end = 0.8)+
-  annotate("rect", xmin = 30, xmax = 35, ymin = -Inf, ymax = Inf,
-           alpha = .2, fill = 'yellow')+
+  # annotate("rect", xmin = 30, xmax = 35, ymin = -Inf, ymax = Inf,
+  #          alpha = .2, fill = 'yellow')+
   theme_bw()+
   labs(x = 'Year', y = 'Biomass relative to control')+
-  facet_wrap(~Name, ncol = 1)
+  facet_wrap(~Name, ncol = 3)
 p_prod
 
-ggsave(paste0('output/', 'relative_plankton_biomass_', run_base, '_vs_', run_prod, '.png'), 
-       p_prod, width = 5, height = 1.5, dpi = 600)
+ggsave(paste0('output/', now, '/relative_plankton_biomass_', run_base, '_vs_', run_prod, '.png'), 
+       p_prod, width = 6, height = 2, dpi = 600)
 
 # CEATTLE -----------------------------------------------------------------
 

@@ -15,10 +15,13 @@ gc()
 
 select <- dplyr::select
 
-run_base <- 1113 # this is the control run we compare results to
-run_warm <- 1114 # just warm (temp) forcings
-run_prod <- 1117 # just plankton prod scalar
-run_warm_prod <- 1115 # temp and plankton scalar - "true" heatwave scenario
+# make new folder to save plots in
+now <- gsub(' ', '_', gsub(':', '.', Sys.time()))
+
+run_base <- 1234 # this is the control run we compare results to
+run_warm <- 1235 # just warm (temp) forcings
+run_prod <- 1236 # just plankton prod scalar
+run_warm_prod <- 1237 # temp and plankton scalar - "true" heatwave scenario
 
 # set paths to directories
 dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
@@ -97,7 +100,7 @@ ts <- ncdf4::ncvar_get(this_nc_base,varid = "t") %>% as.numeric
 tyrs <- ts/(60*60*24*365)
 
 spinup_length <- 30 # how many years is the spinup?
-seas <- 0.8 # one of 0.2, 0.4, 0.6, 0.8, 1 if we use 73 days for the output frequency on run.prm
+seas <- 1 # one of 0.2, 0.4, 0.6, 0.8, 1 if we use 73 days for the output frequency on run.prm
 
 # # area of each box is the same as volume of the deepest depth layer, because the dz of that layer is 1
 areas <- volumes %>% filter(z==max(z)) %>% dplyr::select(b,volume) %>% rename(area=volume)
@@ -117,19 +120,33 @@ goa_sf <- goa_sf %>%
   mutate(botz = ifelse(boundary == TRUE, NA, botz)) %>%
   ungroup()
 
+# optional subset of groups to plot
+#plot_these <- grps$Name
+plot_these <- c("Seabird_dive_fish", "Seabird_surface_fish", #"Seabird_dive_invert", "Seabird_surface_inverts", 
+                "Pollock",  "Cod",
+                "Arrowtooth_flounder", "Halibut",# "Flathead_sole", "Rex_sole", "Flatfish_shallow", "Flatfish_deep" , 
+                "Sablefish",  
+                "Pacific_ocean_perch", "Rockfish_slope",# "Rockfish_pelagic_shelf", "Rockfish_demersal_shelf", 
+                #"Octopus", "Squid", 
+                "Herring", "Capelin", "Sandlance", "Eulachon",# "Forage_slope", 
+                #"Crab_tanner", "Crab_king", "Crab_other",             
+                "Euphausiids", "Macrozooplankton",  "Mesozooplankton", "Microzooplankton", "Jellyfish", "Gelatinous_other", 
+                "Diatoms", "Picophytoplankton")#, 
+                #"Detritus_labile", "Detritus_refractory")
+
 # produce plots
-file_plot_list <- list('eccwo_functions.R',
-                       'fig_intro_methods.R',
-                       'fig_biomass_changes.R',
-                       #'fig_catch_changes.R', # to run this you need to have all results from the same set of runs
-                       'fig_waa_hm_static.R',
-                       'fig_naa_hm_static.R',
-                       #'fig_waa_hm_temporal.R', # these made more sense for the HW stuff
-                       #'fig_naa_hm_temporal.R', # these made more sense for the HW stuff
-                       'fig_spatial_naa.R', 
-                       'fig_diets_changes.R'#,
-                       #'fig_s_appendix.R',
-                       #'fig_dietcomp_appendix.R'
+file_plot_list <- list('R/ices_functions.R',
+                       'R/fig_intro_methods.R',
+                       'R/fig_biomass_changes.R',
+                       'R/fig_catch_changes.R', # to run this you need to have all results from the same set of runs
+                       'R/fig_waa_hm_static.R',
+                       'R/fig_naa_hm_static.R',
+                       #'R/fig_waa_hm_temporal.R', # these made more sense for the HW stuff
+                       #'R/fig_naa_hm_temporal.R', # these made more sense for the HW stuff
+                       'R/fig_spatial_naa.R', 
+                       'R/fig_diet_changes.R'#,
+                       #'fig_s_appendix.R', # these are for the appendix
+                       #'fig_dietcomp_appendix.R' # these are for the appendix
                        )
 
 sapply(file_plot_list, source)

@@ -2,8 +2,12 @@
 # 5/8/2023
 # Code to create heatmap of percent difference in weight at age by age class (last 5 year average) for ICES paper
 
+print('Doing fig_waa_hm_static.R')
+
 # pick groups to plot
 fg_to_plot <- vertebrate_groups %>% pull(Name) # all vertebrates groups
+
+fg_to_plot <- intersect(fg_to_plot, plot_these)
 
 # apply waa plotting function
 # rerun this because the fg to plot are different than from the previous heatmap
@@ -34,7 +38,7 @@ waa_heatmap$age_group <- factor(waa_heatmap$age_group,
 
 # fix order of run
 waa_heatmap$run <- factor(waa_heatmap$run, 
-                          levels = c('weight_warm_prod','weight_warm','weight_prod'))
+                          levels = c('weight_warm','weight_prod','weight_warm_prod'))
 
 # add guild for facets 
 waa_heatmap <- waa_heatmap %>%
@@ -59,7 +63,8 @@ waa_heatmap_5y <- waa_heatmap %>%
 
 # plot
 waa_hm <- waa_heatmap_5y %>%
-  filter(Name != 'Salmon_pink') %>% # salmon pink died in those runs but bring it back in if it survives
+  filter(Name %in% fg_to_plot) %>%
+  #filter(Name != 'Salmon_pink') %>% # salmon pink died in those runs but bring it back in if it survives
   ggplot()+
   geom_tile(aes(x = age, y = LongName, fill = percent_change))+
   scale_fill_viridis()+
@@ -70,5 +75,5 @@ waa_hm <- waa_heatmap_5y %>%
   theme(strip.text.y = element_text(angle = 0))
 waa_hm
 
-ggsave(paste0('output/', 'waa_relchange_5y.png'),
-       waa_hm, width = 8, height=9, dpi = 600)
+ggsave(paste0('output/', now, '/waa_relchange_5y.png'),
+       waa_hm, width = 7.5, height=7.5, dpi = 600)

@@ -2,11 +2,7 @@
 # 5/8/2023
 # Code to create a figure showing biomass differences at the end of the run between scenarios for ICES paper
 
-# dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
-# dir_warm <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_warm, '/')
-# dir_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_prod, '/')
-# dir_warm_prod <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_warm_prod, '/')
-
+print('Doing fig_biomass_changes.R')
 
 # read in biomass tables
 biom_base <- read.table(paste0(dir_base, 'outputGOA0', run_base, '_testBiomIndx.txt'), 
@@ -53,6 +49,10 @@ end_biom <- end_biom %>%
 end_biom <- end_biom %>%
   arrange(run, Guild, change)
 
+# fix order of run
+end_biom$run <- factor(end_biom$run, 
+                        levels = c('warm_to_base','prod_to_base','warm_prod_to_base'))
+
 # fix factors
 end_biom$LongName <- factor(end_biom$LongName, levels = unique(end_biom$LongName))
 end_biom$Guild <- factor(end_biom$Guild, levels = unique(end_biom$Guild))
@@ -75,7 +75,9 @@ end_biom$Guild <- gsub(' ',
                         end_biom$Guild)
 
 # plot
-p_biom <- ggplot(end_biom, aes(x=LongName, y=change, color = for_color)) + 
+p_biom <- end_biom %>%
+  filter(Name %in% plot_these) %>%
+  ggplot(aes(x=LongName, y=change, color = for_color)) + 
   geom_hline(yintercept = 0, color = 'red') +
   geom_point(stat='identity', fill="black", size=2)  +
   geom_segment(aes(y = 0,
@@ -91,4 +93,4 @@ p_biom <- ggplot(end_biom, aes(x=LongName, y=change, color = for_color)) +
   theme(strip.text.y = element_text(angle = 0))
 p_biom
 
-ggsave('output/biom_change.png', p_biom, width = 8.5, height = 8.5)
+ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 8.5, height = 8.5)

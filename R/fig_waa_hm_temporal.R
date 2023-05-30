@@ -6,6 +6,8 @@
 # 1. Temporal dynamics of weight at age
 # 2. Relative differences in weight at age among runs
 
+print('Doing fig_waa_hm_temporal.R')
+
 # apply waa plotting function
 fg_to_plot <- c('Capelin', 'Sandlance', 'Herring', 
                 'Arrowtooth_flounder', 'Pollock', 'Cod',
@@ -45,7 +47,7 @@ waa_warm_prod <- bind_rows(purrr::map(fg_to_plot, plot_wage_timeseries, out = ou
 #   theme_bw()+
 #   facet_grid2(run ~ LongName, scales = 'free_y', independent = 'y', labeller = labeller(run = run_labs))
 # p
-# ggsave(paste0('output/', 'waa_time_series.png'), p,width = 13,height=5)
+# ggsave(paste0('output/', now, '/waa_time_series.png'), p,width = 13,height=5)
 
 
 # Heatmaps of relative difference in WAA over time ------------------------
@@ -97,5 +99,5 @@ waa_hm <- ggplot()+
   facet_grid(Guild~run, scales = 'free_y', space = 'free_y', labeller = labeller(run = run_labs))
 waa_hm
 
-ggsave(paste0('output/', 'waa_relchange.png'),
+ggsave(paste0('output/', now, '/waa_relchange.png'),
        waa_hm,width = 8, height=9, dpi = 600)

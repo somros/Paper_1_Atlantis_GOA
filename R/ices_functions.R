@@ -183,11 +183,11 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       ungroup() %>%
       pivot_longer(-c(Predator, Stage), names_to = 'Prey', values_to = 'Prop') %>%
       left_join((grps %>% select(Code, Name, LongName)), by = c('Predator'='Code')) %>%
-      rename(Predator_Name = Name, Predator_Longname = LongName) %>%
+      rename(Predator_Name = Name, Predator_LongName = LongName) %>%
       select(-Predator) %>%
       left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
-      rename(Prey_Name = Name, Prey_Longname = LongName) %>%
-      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)%>%
+      rename(Prey_Name = Name, Prey_LongName = LongName) %>%
+      select(Prop, Predator_Name, Predator_LongName, Stage, Prey_Name, Prey_LongName)%>%
       filter(Prop > 0.01)
     
     colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')

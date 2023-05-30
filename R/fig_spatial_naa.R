@@ -3,6 +3,8 @@
 # Code to create spatial maps of changes in numbers at age between two runs for ICES paper
 # all the extraction code is take from Owen and PY's code
 
+print('Doing fig_spatial_naa_static.R')
+
 # apply naa plotting function
 
 # pick groups to plot
@@ -64,5 +66,5 @@ p_map <- box_naa_sf %>%
   cowplot::plot_grid(plotlist = ., ncol = 2)
 p_map
   
-ggsave(paste0('output/', 'map_naa_relchange_', run_base, '_vs_', run_warm,'.png'),
+ggsave(paste0('output/', now, '/map_naa_relchange_', run_base, '_vs_', run_warm,'.png'),
        p_map,width = 8,height=6, dpi = 600)  

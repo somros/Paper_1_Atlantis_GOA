@@ -6,6 +6,8 @@
 # 1. Temporal dynamics of numbers at age
 # 2. Relative differences in numbers at age among runs
 
+print('Doing fig_naa_hm_temporal.R')
+
 # apply waa plotting function
 fg_to_plot <- c('Capelin', 'Sandlance', 'Herring', 
                 'Arrowtooth_flounder', 'Pollock', 'Cod',
@@ -44,7 +46,7 @@ naa_warm_prod <- bind_rows(purrr::map(fg_to_plot, plot_abun, out = out_warm_prod
 #   theme_bw()+
 #   facet_grid2(run ~ LongName, scales = 'free_y', independent = 'y', labeller = labeller(run = run_labs))
 # p
-# ggsave(paste0('output/', 'naa_time_series.png'), p,width = 13,height=5)
+# ggsave(paste0('output/', now, '/naa_time_series.png'), p,width = 13,height=5)
 
 # Heatmaps of relative difference in WAA over time ------------------------
 
@@ -95,5 +97,5 @@ naa_hm <- ggplot()+
   facet_grid(Guild~run, scales = 'free_y', space = 'free_y', labeller = labeller(run = run_labs))
 naa_hm
 
-ggsave(paste0('output/', 'naa_relchange.png'),
+ggsave(paste0('output/', now, '/naa_relchange.png'),
        naa_hm, width = 8, height=9, dpi=600)
