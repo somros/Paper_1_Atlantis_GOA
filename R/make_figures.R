@@ -100,7 +100,7 @@ ts <- ncdf4::ncvar_get(this_nc_base,varid = "t") %>% as.numeric
 tyrs <- ts/(60*60*24*365)
 
 spinup_length <- 30 # how many years is the spinup?
-seas <- 1 # one of 0.2, 0.4, 0.6, 0.8, 1 if we use 73 days for the output frequency on run.prm
+seas <- 0.8 # one of 0.2, 0.4, 0.6, 0.8, 1 if we use 73 days for the output frequency on run.prm
 
 # # area of each box is the same as volume of the deepest depth layer, because the dz of that layer is 1
 areas <- volumes %>% filter(z==max(z)) %>% dplyr::select(b,volume) %>% rename(area=volume)
