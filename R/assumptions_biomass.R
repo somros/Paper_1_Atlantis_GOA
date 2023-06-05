@@ -7,6 +7,7 @@ cold_niches_summer_dists <- 1226
 cold_no_niches <- 1230
 cold_niches_winter_dists <- 1234
 cold_q10_0 <- 1254
+cold_q10_2 <- 1262
 cold_q10_altE <- 1258
 cold_no_q10 <- 1250
 
@@ -15,6 +16,7 @@ warm_niches_summer_dists <- 1227
 warm_no_niches <- 1231
 warm_niches_winter_dists <- 1235
 warm_q10_0 <- 1255
+warm_q10_2 <- 1263
 warm_q10_altE <- 1259
 warm_no_q10 <- 1251
 
@@ -23,6 +25,7 @@ dir_cold_niches_summer_dists <- paste0('../../../GOA/Parametrization/output_file
 dir_cold_no_niches <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_no_niches, '/')
 dir_cold_niches_winter_dists <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_niches_winter_dists, '/')
 dir_cold_q10_0 <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_q10_0, '/')
+dir_cold_q10_2 <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_q10_2, '/')
 dir_cold_q10_altE <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_q10_altE, '/')
 dir_cold_no_q10 <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_no_q10, '/')
 
@@ -31,6 +34,7 @@ dir_warm_niches_summer_dists <- paste0('../../../GOA/Parametrization/output_file
 dir_warm_no_niches <- paste0('../../../GOA/Parametrization/output_files/data/out_', warm_no_niches, '/')
 dir_warm_niches_winter_dists <- paste0('../../../GOA/Parametrization/output_files/data/out_', warm_niches_winter_dists, '/')
 dir_warm_q10_0 <- paste0('../../../GOA/Parametrization/output_files/data/out_', warm_q10_0, '/')
+dir_warm_q10_2 <- paste0('../../../GOA/Parametrization/output_files/data/out_', warm_q10_2, '/')
 dir_warm_q10_altE <- paste0('../../../GOA/Parametrization/output_files/data/out_', warm_q10_altE, '/')
 dir_warm_no_q10 <- paste0('../../../GOA/Parametrization/output_files/data/out_', warm_no_q10, '/')
 
@@ -48,6 +52,9 @@ biom_cold_niches_winter_dists <- read.table(paste0(dir_cold_niches_winter_dists,
 biom_cold_q10_0 <- read.table(paste0(dir_cold_q10_0, 'outputGOA0', cold_q10_0, '_testBiomIndx.txt'), 
                                sep = ' ',
                                header = T)
+biom_cold_q10_2 <- read.table(paste0(dir_cold_q10_2, 'outputGOA0', cold_q10_2, '_testBiomIndx.txt'), 
+                              sep = ' ',
+                              header = T)
 biom_cold_q10_altE <- read.table(paste0(dir_cold_q10_altE, 'outputGOA0', cold_q10_altE, '_testBiomIndx.txt'), 
                               sep = ' ',
                               header = T)
@@ -66,6 +73,9 @@ biom_warm_niches_winter_dists <- read.table(paste0(dir_warm_niches_winter_dists,
                              sep = ' ',
                              header = T)
 biom_warm_q10_0 <- read.table(paste0(dir_warm_q10_0, 'outputGOA0', warm_q10_0, '_testBiomIndx.txt'), 
+                              sep = ' ',
+                              header = T)
+biom_warm_q10_2 <- read.table(paste0(dir_warm_q10_2, 'outputGOA0', warm_q10_2, '_testBiomIndx.txt'), 
                               sep = ' ',
                               header = T)
 biom_warm_q10_altE <- read.table(paste0(dir_warm_q10_altE, 'outputGOA0', warm_q10_altE, '_testBiomIndx.txt'), 
@@ -87,27 +97,31 @@ get_biom <- function(this_run){
 end_biom <- do.call('cbind', lapply(list(biom_cold_niches_summer_dists, 
                                          biom_cold_no_niches,
                                          biom_cold_niches_winter_dists,
+                                         biom_cold_q10_2,
                                          biom_cold_q10_0,
-                                         biom_cold_q10_altE,
+                                         #biom_cold_q10_altE,
                                          biom_cold_no_q10,
                                          biom_warm_niches_summer_dists, 
                                          biom_warm_no_niches,
                                          biom_warm_niches_winter_dists,
+                                         biom_warm_q10_2,
                                          biom_warm_q10_0,
-                                         biom_warm_q10_altE,
+                                         #biom_warm_q10_altE,
                                          biom_warm_no_q10), get_biom))
 
 colnames(end_biom) <- c('biom_cold_niches_summer_dists', 
                         'biom_cold_no_niches', 
                         'biom_cold_niches_winter_dists',
+                        'biom_cold_q10_2',
                         'biom_cold_q10_0',
-                        'biom_cold_q10_altE',
+                        #'biom_cold_q10_altE',
                         'biom_cold_no_q10',
                         'biom_warm_niches_summer_dists', 
                         'biom_warm_no_niches', 
                         'biom_warm_niches_winter_dists',
+                        'biom_warm_q10_2',
                         'biom_warm_q10_0',
-                        'biom_warm_q10_altE',
+                        #'biom_warm_q10_altE',
                         'biom_warm_no_q10')
 
 # make plot
@@ -157,21 +171,23 @@ to_plot_assumptions <- c(#"Seabird_dive_fish", "Seabird_surface_fish", #"Seabird
 
 # change scenario names
 key <- data.frame(run = unique(end_biom$run),
-                  label = c('Best niches and bioenergetics', 
+                  label = c('Base niches and bioenergetics', 
                           'No niches',
                           'Seasonal niches',
+                          'All fish dome-shaped  bioenergetics',
                           'Atlantis default  bioenergetics',
-                          'Lower assimilation',
+                          #'Lower assimilation',
                           'No bioenergetics'))
 # join
 end_biom <- end_biom %>% left_join(key, by = 'run')
 
 # reorder
-end_biom$label <- factor(end_biom$label, levels = c('Best niches and bioenergetics', 
+end_biom$label <- factor(end_biom$label, levels = c('Base niches and bioenergetics', 
                                                     'Seasonal niches',
                                                     'No niches',
+                                                    'All fish dome-shaped  bioenergetics',
                                                     'Atlantis default  bioenergetics',
-                                                    'Lower assimilation',
+                                                    #'Lower assimilation',
                                                     'No bioenergetics'))
 
 p_assumptions <- end_biom %>%
@@ -188,4 +204,28 @@ p_assumptions
 
 ggsave(paste0('output/', now, '/biom_assumptions.png'), p_assumptions, width = 8, height = 4.5)
 
-  
+# plot relative
+end_biom_base <- end_biom %>% 
+  filter(run == 'niches_summer_dists') %>% 
+  dplyr::select(group, regime, biomass) %>%
+  rename(biomass_base = biomass)
+
+end_biom_scenarios <- end_biom %>% filter(run != 'niches_summer_dists')
+end_biom1 <- end_biom %>% 
+  left_join(end_biom_base, by = c('group','regime')) %>%
+  mutate(biom_change = (biomass - biomass_base) / biomass_base * 100)
+
+p_assumptions_rel <- end_biom1 %>%
+  filter(Name %in% to_plot_assumptions) %>%
+  ggplot(aes(x = LongName, y = biom_change, group = regime))+
+  geom_point(aes(shape = label, color = regime), size = 4, position = position_dodge(width = 0.8))+
+  geom_hline(yintercept = 0, color = 'red', linetype = 'dashed')+
+  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1.05, vjust = 1, size = 11),
+        axis.text.y = element_text(size = 11))+
+  labs(x = '', y = 'Terminal biomass change from base scenario (%)', shape = 'Assumption', color = 'Regime')+
+  facet_grid(~Guild, scales = 'free_x', space = 'free_x')
+p_assumptions_rel
+ggsave(paste0('output/', now, '/biom_assumptions_rel.png'), p_assumptions_rel, width = 8, height = 4.5)
+
