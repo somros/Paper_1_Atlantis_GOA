@@ -18,10 +18,10 @@ select <- dplyr::select
 # make new folder to save plots in
 now <- gsub(' ', '_', gsub(':', '.', Sys.time()))
 
-run_base <- 1234 # this is the control run we compare results to
-run_warm <- 1235 # just warm (temp) forcings
-run_prod <- 1236 # just plankton prod scalar
-run_warm_prod <- 1237 # temp and plankton scalar - "true" heatwave scenario
+run_base <- 1226 # this is the control run we compare results to
+run_warm <- 1227 # just warm (temp) forcings
+run_prod <- 1228 # just plankton prod scalar
+run_warm_prod <- 1229 # temp and plankton scalar - "true" heatwave scenario
 
 # set paths to directories
 dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
@@ -143,7 +143,7 @@ file_plot_list <- list('R/ices_functions.R',
                        'R/fig_naa_hm_static.R',
                        #'R/fig_waa_hm_temporal.R', # these made more sense for the HW stuff
                        #'R/fig_naa_hm_temporal.R', # these made more sense for the HW stuff
-                       'R/fig_spatial_naa.R', 
+                       'R/fig_spatial_naa.R',
                        'R/fig_diet_changes.R'#,
                        #'fig_s_appendix.R', # these are for the appendix
                        #'fig_dietcomp_appendix.R' # these are for the appendix

@@ -56,8 +56,18 @@ naa_heatmap_5y <- naa_heatmap %>%
   ungroup() %>%
   mutate(percent_change = ((abun_exp-abun_base)/abun_base)*100)
 
+# arrange guilds for plot
+naa_heatmap_5y_1 <- naa_heatmap_5y %>%
+  filter(Name %in% fg_to_plot) %>%
+  mutate(Guild = factor(Guild, levels = c("Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",      
+                                          "Seabirds")))
+
 # plot
-naa_hm <- naa_heatmap_5y %>%
+naa_hm <- naa_heatmap_5y_1 %>%
   filter(Name %in% fg_to_plot) %>%
   #filter(Name != 'Salmon_pink', Name != 'Skate_big') %>%
   ggplot()+
@@ -71,4 +81,9 @@ naa_hm <- naa_heatmap_5y %>%
 naa_hm
 
 ggsave(paste0('output/', now, '/naa_relchange_5y.png'),
-       naa_hm, width = 7.5, height=7.5, dpi = 600)
+       naa_hm, width = 7.7, height=5.8, dpi = 600)
+
+# some numbers
+tt <- naa_heatmap_5y_1 %>%
+  group_by(run, Name) %>%
+  summarise(meanchange = mean(percent_change))

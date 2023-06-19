@@ -185,8 +185,8 @@ end_biom <- end_biom %>% left_join(key, by = 'run')
 end_biom$label <- factor(end_biom$label, levels = c('Base niches and bioenergetics', 
                                                     'Seasonal niches',
                                                     'No niches',
-                                                    'All fish dome-shaped  bioenergetics',
                                                     'Atlantis default  bioenergetics',
+                                                    'All fish dome-shaped  bioenergetics',
                                                     #'Lower assimilation',
                                                     'No bioenergetics'))
 

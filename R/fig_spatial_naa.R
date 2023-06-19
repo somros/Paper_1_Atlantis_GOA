@@ -67,4 +67,4 @@ p_map <- box_naa_sf %>%
 p_map
   
 ggsave(paste0('output/', now, '/map_naa_relchange_', run_base, '_vs_', run_warm,'.png'),
-       p_map,width = 8,height=6, dpi = 600)  
+       p_map,width = 8,height=5, dpi = 600)  

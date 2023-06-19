@@ -61,9 +61,18 @@ waa_heatmap_5y <- waa_heatmap %>%
   ungroup() %>%
   mutate(percent_change = ((weight_exp-weight_base)/weight_base)*100)
 
-# plot
-waa_hm <- waa_heatmap_5y %>%
+# arrange guilds for plot
+waa_heatmap_5y_1 <- waa_heatmap_5y %>%
   filter(Name %in% fg_to_plot) %>%
+  mutate(Guild = factor(Guild, levels = c("Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",      
+                                          "Seabirds")))
+
+# plot
+waa_hm <- waa_heatmap_5y_1 %>%
   #filter(Name != 'Salmon_pink') %>% # salmon pink died in those runs but bring it back in if it survives
   ggplot()+
   geom_tile(aes(x = age, y = LongName, fill = percent_change))+
@@ -76,4 +85,10 @@ waa_hm <- waa_heatmap_5y %>%
 waa_hm
 
 ggsave(paste0('output/', now, '/waa_relchange_5y.png'),
-       waa_hm, width = 7.5, height=7.5, dpi = 600)
+       waa_hm, width = 7.7, height=5.8, dpi = 600)
+
+# some numbers
+tt <- waa_heatmap_5y_1 %>%
+  group_by(run, Name) %>%
+  summarise(meanchange = mean(percent_change))
+

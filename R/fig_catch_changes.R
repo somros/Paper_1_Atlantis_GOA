@@ -75,21 +75,34 @@ end_catch$Guild <- gsub(' ',
                         '\n',
                         end_catch$Guild)
 
-# plot
-p_catch <- end_catch %>%
+# order guilds so that they go from low to high trophic level starting from the top of the plot
+end_catch1 <- end_catch %>%
   filter(Name %in% plot_these) %>%
+  mutate(Guild = factor(Guild, levels = c("Phytoplankton",
+                                          "Zooplankton",
+                                          "Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",
+                                          "Seabirds")))
+
+# plot
+p_catch <- end_catch1 %>%
   filter(Guild != 'Seabirds', Guild != 'Marine\nmammals') %>%
   ggplot(aes(x=LongName, y=change, color = for_color)) + 
   geom_hline(yintercept = 0, color = 'red') +
-  geom_point(stat='identity', fill="black", size=2)  +
+  geom_point(stat='identity', fill="black", size=3)  +
   geom_segment(aes(y = 0,
                    x = LongName,
                    yend = change,
                    xend = LongName, 
-                   color = for_color)) +
+                   color = for_color),
+               linewidth = 1.5) +
   scale_color_viridis_d(begin = 0.2, end = 0.8) +
   theme_bw() +
   labs(x = '', y = '% change in catch from base scenario') + 
+  guides(color="none") +
   coord_flip()+
   facet_grid(Guild~run, scales = 'free_y', space = 'free_y', labeller = labeller(run = run_labs))+
   theme(strip.text.y = element_text(angle = 0))
