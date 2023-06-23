@@ -277,3 +277,84 @@ collapse_array <- function(mat){
   colnames(mat3) <- 0:108
   mat3
 }
+
+# function to extract weight-at-age of all groups to plot in appendix
+extract_wage_all <- function(out, this.nc){
+  
+  #Extract from the output .nc file the appropriate reserve N time series variables
+  resN_vars <- hyper_vars(out) %>% # all variables in the .nc file active grid
+    filter(grepl("_ResN",name)) # filter for reserve N
+  
+  #Extract from the output .nc file the appropriate structural N time series variables
+  strucN_vars <- hyper_vars(out) %>% # all variables in the .nc file active grid
+    filter(grepl("_StructN",name)) # filter for structural N
+  
+  # Get numbers by box
+  abun_vars <- hyper_vars(out) %>% # all variables in the .nc file active grid
+    filter(grepl("_Nums",name))  # filter for abundance variables
+  
+  if(nrow(resN_vars)==0) {return("no data.")}
+  else {
+    # # Actually pull the data from the .nc
+    resN <- purrr::map(resN_vars$name,ncdf4::ncvar_get,nc=this.nc) 
+    strucN <- purrr::map(strucN_vars$name,ncdf4::ncvar_get,nc=this.nc)
+    nums <-purrr::map(abun_vars$name,ncdf4::ncvar_get,nc=this.nc) #numbers by age group,box,layer,time
+    totnums <-nums %>% purrr::map(apply,MARGIN=3,FUN=sum) # total numbers by age group, time
+    relnums <- purrr::map2(nums,totnums,sweep,MARGIN=3,FUN=`/`) # divide nums by totnums along the time axis to get relative annual nums per age group/box/layer
+    
+    # add the two matrices to get total nitrogen weight
+    rnsn <- purrr::map2(resN,strucN,`+`)
+    
+    # multiply and sum to get abundance-weighted mean weight at age
+    rnsn_summ <- purrr::map2(rnsn,relnums,`*`) %>% 
+      purrr::map(apply,MARGIN=3,FUN=sum) %>% # mean total N by time
+      bind_cols() %>% # bind age groups elements together
+      suppressMessages() %>% 
+      set_names(resN_vars$name) %>% 
+      mutate(t=tyrs) %>%
+      # pivot to long form
+      pivot_longer(cols = -t,names_to = 'age_group',values_to = 'totN') %>%
+      mutate(age=parse_number(age_group)) %>% 
+      mutate(weight=totN*20*5.7/1000000) %>%   # convert totN to weight/individual in kg
+      dplyr::filter(t>0) %>%
+      mutate(year = t) %>%#ceiling(t)) %>%
+      group_by(year, age_group, age) %>%
+      summarise(weight = mean(weight)) %>%
+      ungroup() %>%
+      mutate(Name = gsub('[[:digit:]]+', '', (gsub('_ResN','',age_group)))) %>%
+      left_join(grps %>% dplyr::select(Name, LongName), by = 'Name')
+    
+    
+    return(rnsn_summ)
+  }
+}
+
+# function that extracts abundance of all groups and plots it for the appendix
+extract_nage_all <- function(out, this.nc){
+  
+  #Extract from the output .nc file the appropriate time series variables
+  abun_vars <- hyper_vars(out) %>% # all variables in the .nc file active grid
+    filter(grepl("_Nums",name)) # filter for abundance variables
+  # Actually pull the data from the .nc
+  
+  abun1 <- purrr::map(abun_vars$name,ncdf4::ncvar_get,nc=this.nc) %>% 
+    lapply(setNA) %>%
+    purrr::map(apply,MARGIN=3,FUN=sum,na.rm=T) %>% 
+    bind_cols() %>% 
+    suppressMessages() %>% 
+    set_names(abun_vars$name) %>% 
+    mutate(t=tyrs)
+  
+  abun2 <- abun1 %>%
+    pivot_longer(cols = -t, names_to = 'age_group', values_to = 'abun') %>%
+    mutate(age=parse_number(age_group)) %>%
+    mutate(year = t) %>%#ceiling(t)) %>%
+    group_by(year, age_group, age) %>%
+    summarise(abun = mean(abun)) %>%
+    ungroup() %>%
+    mutate(Name = gsub('[[:digit:]]+', '', (gsub('_Nums','',age_group)))) %>%
+    left_join(grps %>% dplyr::select(Name, LongName), by = 'Name')
+  
+  
+  return(abun2)
+}
