@@ -71,6 +71,27 @@ waa_heatmap_5y_1 <- waa_heatmap_5y %>%
                                           "Other\ndemersal\nfish",      
                                           "Seabirds")))
 
+waa_heatmap_5y_1 <- waa_heatmap_5y %>%
+  filter(Name %in% plot_these) %>%
+  mutate(Guild = factor(Guild, levels = c("Algae",
+                                          "Phytoplankton",
+                                          "Zooplankton",
+                                          "Infauna",
+                                          "Epibenthos",
+                                          "Crustaceans",
+                                          "Shrimps",
+                                          "Cephalopod",
+                                          "Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",
+                                          "Salmon",
+                                          "Cartilaginous\nfish",
+                                          "Seabirds",
+                                          "Marine\nmammals",
+                                          "Detritus\nand\nbacteria")))
+
 # plot
 waa_hm <- waa_heatmap_5y_1 %>%
   #filter(Name != 'Salmon_pink') %>% # salmon pink died in those runs but bring it back in if it survives
@@ -85,10 +106,13 @@ waa_hm <- waa_heatmap_5y_1 %>%
 waa_hm
 
 ggsave(paste0('output/', now, '/waa_relchange_5y.png'),
-       waa_hm, width = 7.7, height=5.8, dpi = 600)
+       waa_hm, width = 7.7, height=10, dpi = 600)
+
 
 # some numbers
-tt <- waa_heatmap_5y_1 %>%
-  group_by(run, Name) %>%
-  summarise(meanchange = mean(percent_change))
+# tt <- waa_heatmap_5y_1 %>%
+#   group_by(run, Name) %>%
+#   summarise(meanchange = mean(percent_change)) %>%
+#   ungroup() %>%
+#   filter(run == 'warm_prod')
 

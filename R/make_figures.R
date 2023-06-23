@@ -121,32 +121,32 @@ goa_sf <- goa_sf %>%
   ungroup()
 
 # optional subset of groups to plot
-#plot_these <- grps$Name
-plot_these <- c("Seabird_dive_fish", "Seabird_surface_fish", #"Seabird_dive_invert", "Seabird_surface_inverts", 
-                "Pollock",  "Cod",
-                "Arrowtooth_flounder", "Halibut",# "Flathead_sole", "Rex_sole", "Flatfish_shallow", "Flatfish_deep" , 
-                "Sablefish",  
-                "Pacific_ocean_perch", "Rockfish_slope",# "Rockfish_pelagic_shelf", "Rockfish_demersal_shelf", 
-                #"Octopus", "Squid", 
-                "Herring", "Capelin", "Sandlance", "Eulachon",# "Forage_slope", 
-                #"Crab_tanner", "Crab_king", "Crab_other",             
-                "Euphausiids", "Macrozooplankton",  "Mesozooplankton", "Microzooplankton", "Jellyfish", "Gelatinous_other", 
-                "Diatoms", "Picophytoplankton")#, 
-                #"Detritus_labile", "Detritus_refractory")
+plot_these <- grps$Name
+# plot_these <- c("Seabird_dive_fish", "Seabird_surface_fish", #"Seabird_dive_invert", "Seabird_surface_inverts", 
+#                 "Pollock",  "Cod",
+#                 "Arrowtooth_flounder", "Halibut",# "Flathead_sole", "Rex_sole", "Flatfish_shallow", "Flatfish_deep" , 
+#                 "Sablefish",  
+#                 "Pacific_ocean_perch", "Rockfish_slope",# "Rockfish_pelagic_shelf", "Rockfish_demersal_shelf", 
+#                 #"Octopus", "Squid", 
+#                 "Herring", "Capelin", "Sandlance", "Eulachon",# "Forage_slope", 
+#                 #"Crab_tanner", "Crab_king", "Crab_other",             
+#                 "Euphausiids", "Macrozooplankton",  "Mesozooplankton", "Microzooplankton", "Jellyfish", "Gelatinous_other", 
+#                 "Diatoms", "Picophytoplankton")#, 
+#                 #"Detritus_labile", "Detritus_refractory")
 
 # produce plots
-file_plot_list <- list('R/ices_functions.R',
-                       'R/fig_intro_methods.R',
-                       'R/fig_biomass_changes.R',
-                       'R/fig_catch_changes.R', # to run this you need to have all results from the same set of runs
-                       'R/fig_waa_hm_static.R',
-                       'R/fig_naa_hm_static.R',
-                       #'R/fig_waa_hm_temporal.R', # these made more sense for the HW stuff
-                       #'R/fig_naa_hm_temporal.R', # these made more sense for the HW stuff
-                       'R/fig_spatial_naa.R',
-                       'R/fig_diet_changes.R'#,
-                       #'fig_s_appendix.R', # these are for the appendix
-                       #'fig_dietcomp_appendix.R' # these are for the appendix
-                       )
-
-sapply(file_plot_list, source)
+#' file_plot_list <- list('R/ices_functions.R',
+#'                        'R/fig_intro_methods.R',
+#'                        'R/fig_biomass_changes.R',
+#'                        'R/fig_catch_changes.R', # to run this you need to have all results from the same set of runs
+#'                        'R/fig_waa_hm_static.R',
+#'                        'R/fig_naa_hm_static.R',
+#'                        #'R/fig_waa_hm_temporal.R', # these made more sense for the HW stuff
+#'                        #'R/fig_naa_hm_temporal.R', # these made more sense for the HW stuff
+#'                        'R/fig_spatial_naa.R',
+#'                        'R/fig_diet_changes.R'#,
+#'                        #'fig_s_appendix.R', # these are for the appendix
+#'                        #'fig_dietcomp_appendix.R' # these are for the appendix
+#'                        )
+#' 
+#' sapply(file_plot_list, source)

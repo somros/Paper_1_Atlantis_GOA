@@ -66,6 +66,27 @@ naa_heatmap_5y_1 <- naa_heatmap_5y %>%
                                           "Other\ndemersal\nfish",      
                                           "Seabirds")))
 
+naa_heatmap_5y_1 <- naa_heatmap_5y %>%
+  filter(Name %in% plot_these) %>%
+  mutate(Guild = factor(Guild, levels = c("Algae",
+                                          "Phytoplankton",
+                                          "Zooplankton",
+                                          "Infauna",
+                                          "Epibenthos",
+                                          "Crustaceans",
+                                          "Shrimps",
+                                          "Cephalopod",
+                                          "Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",
+                                          "Salmon",
+                                          "Cartilaginous\nfish",
+                                          "Seabirds",
+                                          "Marine\nmammals",
+                                          "Detritus\nand\nbacteria")))
+
 # plot
 naa_hm <- naa_heatmap_5y_1 %>%
   filter(Name %in% fg_to_plot) %>%
@@ -81,9 +102,11 @@ naa_hm <- naa_heatmap_5y_1 %>%
 naa_hm
 
 ggsave(paste0('output/', now, '/naa_relchange_5y.png'),
-       naa_hm, width = 7.7, height=5.8, dpi = 600)
+       naa_hm, width = 7.7, height=10, dpi = 600)
 
 # some numbers
 tt <- naa_heatmap_5y_1 %>%
   group_by(run, Name) %>%
-  summarise(meanchange = mean(percent_change))
+  summarise(meanchange = mean(percent_change)) %>%
+  ungroup() %>%
+  filter(run == 'abun_prod')

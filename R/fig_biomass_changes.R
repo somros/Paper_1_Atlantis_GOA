@@ -85,6 +85,27 @@ end_biom1 <- end_biom %>%
                                           "Sebastes\nand\nSebastolobus",
                                           "Other\ndemersal\nfish",
                                           "Seabirds")))
+
+# end_biom1 <- end_biom %>%
+#   filter(Name %in% plot_these) %>%
+#   mutate(Guild = factor(Guild, levels = c("Algae",
+#                                           "Phytoplankton",
+#                                           "Zooplankton",
+#                                           "Infauna",
+#                                           "Epibenthos",
+#                                           "Crustaceans",
+#                                           "Shrimps",
+#                                           "Cephalopod",
+#                                           "Forage\nfish",
+#                                           "Flatfish",
+#                                           "Gadids",
+#                                           "Sebastes\nand\nSebastolobus",
+#                                           "Other\ndemersal\nfish",
+#                                           "Salmon",
+#                                           "Cartilaginous\nfish",
+#                                           "Seabirds",
+#                                           "Marine\nmammals",
+#                                           "Detritus\nand\nbacteria")))
   
 # plot
 p_biom <- end_biom1 %>%
@@ -106,4 +127,11 @@ p_biom <- end_biom1 %>%
   theme(strip.text.y = element_text(angle = 0))
 p_biom
 
-ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 8.5, height = 8.5)
+ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 8.5, height = 12)
+
+# # some numbers
+# tt <- end_biom1 %>%
+#   group_by(run, Name) %>%
+#   summarise(meanchange = mean(change)) %>%
+#   ungroup() %>%
+#   filter(run == 'prod_to_base')

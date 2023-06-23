@@ -241,14 +241,14 @@ tcorr_frame <- data.frame('Tamb' = seq(0, 30, 0.1)) %>%
 tcorr_frame_long <- tcorr_frame %>%
   pivot_longer(-Tamb, names_to = 'Species', values_to = 'Tcorr')
 
-tcorr_frame_long$Species <- gsub('ATF', 'Arrowtooth_flounder', tcorr_frame_long$Species)
+#tcorr_frame_long$Species <- gsub('ATF', 'Arrowtooth flounder', tcorr_frame_long$Species)
   
 p_q10 <- tcorr_frame_long %>%
   ggplot(aes(x = Tamb, y = Tcorr, color = Species))+
   geom_line(linewidth = 1.5)+
   scale_color_viridis_d(begin = 0.1, end = 0.9)+
   theme_bw()+
-  labs(x = 'Temperature (\u00B0C)', 'Tcorr')
+  labs(x = 'Temperature (\u00B0C)', y = bquote('T'[scalar]))
 
 p_q10
 ggsave('output/CEATTLE_bioenergetics.png', p_q10, width = 4.5, height = 2, dpi = 300)
@@ -326,4 +326,8 @@ p_niche <- dat3 %>%
   facet_wrap(~Name, ncol = 4)
 p_niche
 ggsave('output/thermal_niche_groundfish.png', p_niche, width = 6, height = 2.5, dpi = 600)
-  
+
+# together
+library(patchwork)
+p_both <- (p_niche / p_q10) + plot_annotation(tag_levels = "A")
+ggsave('temp_paper.png', p_both, width = 8, height = 4)  
