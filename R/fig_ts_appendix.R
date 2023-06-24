@@ -11,13 +11,13 @@ simyears <- 30
 total_biomass <- read.table(paste0(dir_base, 'outputGOA0', run_base, '_testBiomIndx.txt'), header = T)
 
 init_biomass <- total_biomass %>%
-  dplyr::select(Time:DC) %>%
+  dplyr::select(Time:DR) %>%
   pivot_longer(-Time, names_to = 'Code', values_to = 'biomass_init') %>%
   filter(Time == 0) %>%
   dplyr::select(-Time)
 
 end_biomass <- total_biomass %>%
-  dplyr::select(Time:DC) %>%
+  dplyr::select(Time:DR) %>%
   pivot_longer(-Time, names_to = 'Code', values_to = 'biomass_end') %>% # take last 5 years for terminal biomass
   mutate(Time = ceiling(Time / 365)) %>%
   filter(Time <= simyears) %>%
@@ -31,7 +31,9 @@ diff_biomass <- init_biomass %>%
   left_join(end_biomass) %>%
   left_join(grps %>% dplyr::select(Code, LongName), by = 'Code') %>%
   mutate(diff = biomass_end / biomass_init) %>%
-  dplyr::select(LongName, diff) %>%
+  dplyr::select(LongName, diff) 
+
+diff_biomass %>%
   mutate(in_bounds = case_when(
     diff > 0.5 & diff < 2 ~ 1,
     diff > 0.25 & diff < 4 ~ 2,
