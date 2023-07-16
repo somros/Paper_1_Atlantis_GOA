@@ -141,8 +141,8 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
       rename(Prey_Name = Name, Prey_LongName = LongName) %>%
       mutate(Cohort = NA) %>% # add empty cohort variable
-      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)%>%
-      filter(Prop > 0.01)
+      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)#%>%
+      #filter(Prop > 0.01)
 
       colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
     
@@ -173,10 +173,10 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
     
     dietcheck1 <- dietcheck %>%
       mutate(Time = Time / 365) %>%
-      filter(Time >= (max(Time)-5)) %>% # focus on last 5 years of the run
+      filter(Time > 25 & Time <=30) %>% # <= (ceiling(max(Time))-5)) %>% # focus on last 5 years of the run
       left_join(agemat, by = c('Predator' = 'Code')) %>%
       rowwise() %>%
-      mutate(Stage = ifelse(is.na(agemat), 1, ifelse(Cohort < agemat, 0, 1))) %>%
+      mutate(Stage = ifelse(is.na(agemat), 'Adult', ifelse(Cohort < agemat, 'Juvenile', 'Adult'))) %>%
       ungroup() %>%
       group_by(Predator, Stage) %>%
       summarise(across(KWT:DR, mean)) %>%
@@ -188,9 +188,9 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
       rename(Prey_Name = Name, Prey_LongName = LongName) %>%
       select(Prop, Predator_Name, Predator_LongName, Stage, Prey_Name, Prey_LongName)%>%
-      filter(Prop > 0.01)
+      filter(Prop > 0.005)
     
-    colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
+    #colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
     
   }
   return(dietcheck1)
@@ -239,7 +239,8 @@ handle_dists <- function(this_species, isvert = TRUE){
         filter(seas == seas[s]) %>%
         pivot_wider(id_cols = box_id, names_from = stage, values_from = value)
       
-      drop_stage[s] <- identical(dat1$A, dat1$J)
+      #drop_stage[s] <- identical(dat1$A, dat1$J)
+      drop_stage[s] <- isTRUE(all.equal(dat1$A, dat1$J, tolerance = 1e-12))
       
     }
     

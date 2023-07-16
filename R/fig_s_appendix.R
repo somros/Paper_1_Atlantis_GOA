@@ -63,17 +63,17 @@ for(i in 1:length(longnames)){
     if(length(stg) > 1 & length(seas) == 1){
       
       p <- p+facet_wrap(~stage, ncol = 1)
-      ggsave(paste0('output/s/', longnames[i], '.png'),p,width = 6,height=4)
+      ggsave(paste0('output/s/new/', longnames[i], '.png'),p,width = 6,height=4)
       
     } else if (length(stg) == 1 & length(seas) > 1) {
       
       p <- p+facet_wrap(~seas, ncol = 2)
-      ggsave(paste0('output/s/', longnames[i], '.png'),p,width = 6,height=3)
+      ggsave(paste0('output/s/new/', longnames[i], '.png'),p,width = 6,height=3)
       
     } else {
       
       p <- p
-      ggsave(paste0('output/s/', longnames[i], '.png'),p,width = 6,height=2.4)
+      ggsave(paste0('output/s/new/', longnames[i], '.png'),p,width = 6,height=2.4)
       
     }
 }

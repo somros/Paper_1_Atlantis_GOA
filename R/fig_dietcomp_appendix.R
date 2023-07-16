@@ -4,13 +4,13 @@
 # To be used in the section of the text (appendix) for each individual group
 # Two pathways:
 # 1. Diets from a pprey matrix (input). Note that this should be a pre-calibration diet matrix
-# 2. Diet compositions as output
+# 2. Diet compositions as output 
 
 
 # Input from PPREY matrix -------------------------------------------------
 
 # pick run
-this_run <- 1190
+this_run <- 1327
 this_dir <- paste0('../../../GOA/Parametrization/output_files/data/out_', this_run, '/')
 
 
@@ -173,7 +173,6 @@ for (i in 1:length(all_fg)){
   
 }
 
-
 # Output from model run ---------------------------------------------------
 
 diets_base <- read.table(paste0(this_dir, 'outputGOA0', this_run, '_testDietCheck.txt'), header = T)
@@ -189,16 +188,15 @@ pred_names <- grps %>%
 # apply function to get diet changes
 diets_processed <- compare_diets(diets_base, prednames = pred_names, run = this_run, age_split = 'stage')
 
-# # order
+# # order names and stages of the predators
 diets_processed <- diets_processed %>%
-  arrange(factor(Predator_Name, levels = pred_names), Stage)
+  arrange(factor(Predator_Name, levels = pred_names))
 
-# fix order of Perdator_Name
+# fix order of Predator_Name
 diets_processed$Predator_Name <- factor(diets_processed$Predator_Name, levels = pred_names)
 
-# fix order of age_group
-diets_processed$Stage <- factor(diets_processed$Stage,
-                            levels = rev(unique(diets_processed$Stage)))
+# fix order of predator stage for plot
+diets_processed$Stage <- factor(diets_processed$Stage, levels = c('Juvenile','Adult'))
 
 # add predator guild for facets 
 diets_processed <- diets_processed %>%
@@ -216,36 +214,36 @@ diets_processed$Prey_Guild <- gsub(' ',
 
 # make barcharts instead of heatmap
 
+all_fg <- unique(diets_processed$Predator_Name)
+
 for (i in 1:length(all_fg)){
   this_fg <- all_fg[i]
+  #this_fg <- all_fg[1]
   
-  this_diet <- diets_long %>% 
-    filter(Pred_name == this_fg) %>%
+  this_diet <- diets_processed %>% 
+    filter(Predator_Name == this_fg) %>%
     drop_na() 
   
-  colourCount <- length(unique(this_diet$Prey_name)) 
+  colourCount <- length(unique(this_diet$Prey_Name)) 
   getPalette <- colorRampPalette(brewer.pal(12, "Paired"))
+  
+  nrows <- length(unique(this_diet$Prey_LongName))
   
   p <- this_diet %>%
     ggplot()+
-    geom_bar(aes(x = Stage, y = Prop, fill = Prey_name), stat = 'identity', position = 'stack')+
+    geom_bar(aes(x = Stage, y = Prop, fill = Prey_LongName), stat = 'identity', position = 'stack')+
     scale_fill_manual(values = getPalette(colourCount))+
     theme_bw()+
-    theme(axis.text.x = element_text(angle = 20, hjust = 1.05, vjust = 1, size = 11),
+    theme(axis.text.x = element_text(size = 11), #angle = 20, hjust = 1.05, vjust = 1),
           axis.text.y = element_text(size = 11))+
     labs(x = '', y = "Diet preference (%)",
-         fill = "Prey")
+         fill = "Prey")+
+    guides(fill = guide_legend(nrow = 10))
   
-  if(this_diet$Stage[1] == 'Pred:Prey') {
-    ggsave(paste('output/diets_input/',this_fg,'diet.png',sep='_'), p, width = 4, height = 6)
+  if(length(unique(this_diet$Stage)) == 1) {
+    ggsave(paste('output/diets_output/',this_fg,'diet.png',sep='_'), p, width = 4, height = 3)
   } else {
-    ggsave(paste('output/diets_input/',this_fg,'diet.png',sep='_'), p, width = 10.5, height = 6)
+    ggsave(paste('output/diets_output/',this_fg,'diet.png',sep='_'), p, width = 6, height = 3)
   }
   
 }
-
-
-
-# this plot highlights that predation is really low on some groups
-# see POP and other rockfish groups, nothing is really eating them
-# predation on adult groundfish is probably relatively uncaptured in the AFSC diet data

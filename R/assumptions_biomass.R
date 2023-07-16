@@ -3,22 +3,22 @@
 # list runs
 # review these at home...
 # cold runs
-cold_niches_summer_dists <- 1226
-cold_no_niches <- 1230
-cold_niches_winter_dists <- 1234
-cold_q10_0 <- 1254
-cold_q10_2 <- 1262
+cold_niches_summer_dists <- 1292
+cold_no_niches <- 1296
+cold_niches_winter_dists <- 1298
+cold_q10_0 <- 1302
+cold_q10_2 <- 1304
 cold_q10_altE <- 1258
-cold_no_q10 <- 1250
+cold_no_q10 <- 1300
 
 # warm runs
-warm_niches_summer_dists <- 1227
-warm_no_niches <- 1231
-warm_niches_winter_dists <- 1235
-warm_q10_0 <- 1255
-warm_q10_2 <- 1263
+warm_niches_summer_dists <- 1293
+warm_no_niches <- 1297
+warm_niches_winter_dists <- 1299
+warm_q10_0 <- 1303
+warm_q10_2 <- 1305
 warm_q10_altE <- 1259
-warm_no_q10 <- 1251
+warm_no_q10 <- 1301
 
 # set paths to directories
 dir_cold_niches_summer_dists <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_niches_summer_dists, '/')
@@ -157,20 +157,20 @@ end_biom <- end_biom %>%
 # run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
 # names(run_labs) <- c('warm_prod_to_base','warm_to_base','prod_to_base')
 
-to_plot_assumptions <- unique(end_biom$Name) # plot only fish but at least all fish
-to_plot_assumptions <- grps %>% filter(GroupType == 'FISH') %>% pull(Name)
+# to_plot_assumptions <- unique(end_biom$Name) # plot only fish but at least all fish
+# to_plot_assumptions <- grps %>% filter(GroupType == 'FISH') %>% pull(Name)
 
-# to_plot_assumptions <- c(#"Seabird_dive_fish", "Seabird_surface_fish", #"Seabird_dive_invert", "Seabird_surface_inverts", 
-#                          "Pollock",  "Cod",
-#                          "Arrowtooth_flounder", "Halibut",# "Flathead_sole", "Rex_sole", "Flatfish_shallow", "Flatfish_deep" , 
-#                          #"Sablefish",  
-#                          #"Pacific_ocean_perch", "Rockfish_slope",# "Rockfish_pelagic_shelf", "Rockfish_demersal_shelf", 
-#                          #"Octopus", "Squid", 
-#                          "Herring", "Capelin", "Sandlance", "Eulachon")#,# "Forage_slope", 
-#                          #"Crab_tanner", "Crab_king", "Crab_other",             
-#                          #"Euphausiids", "Macrozooplankton",  "Mesozooplankton", "Microzooplankton", "Jellyfish", "Gelatinous_other", 
-#                          #"Diatoms", "Picophytoplankton")#, 
-# #"Detritus_labile", "Detritus_refractory")
+to_plot_assumptions <- c(#"Seabird_dive_fish", "Seabird_surface_fish", #"Seabird_dive_invert", "Seabird_surface_inverts",
+                         "Pollock",  "Cod",
+                         "Arrowtooth_flounder", "Halibut",# "Flathead_sole", "Rex_sole", "Flatfish_shallow", "Flatfish_deep" ,
+                         #"Sablefish",
+                         #"Pacific_ocean_perch", "Rockfish_slope",# "Rockfish_pelagic_shelf", "Rockfish_demersal_shelf",
+                         #"Octopus", "Squid",
+                         "Herring", "Capelin", "Sandlance", "Eulachon")#,# "Forage_slope",
+                         #"Crab_tanner", "Crab_king", "Crab_other",
+                         #"Euphausiids", "Macrozooplankton",  "Mesozooplankton", "Microzooplankton", "Jellyfish", "Gelatinous_other",
+                         #"Diatoms", "Picophytoplankton")#,
+#"Detritus_labile", "Detritus_refractory")
 
 # change scenario names
 key <- data.frame(run = unique(end_biom$run),
@@ -233,16 +233,16 @@ end_biom1 <- end_biom %>%
   left_join(end_biom_base, by = c('group','regime')) %>%
   mutate(biom_change = (biomass - biomass_base) / biomass_base * 100)
 
-# p_assumptions_rel <- end_biom1 %>%
-#   filter(Name %in% to_plot_assumptions) %>%
-#   ggplot(aes(x = LongName, y = biom_change, group = regime))+
-#   geom_point(aes(shape = label, color = regime), size = 4, position = position_dodge(width = 0.8))+
-#   geom_hline(yintercept = 0, color = 'red', linetype = 'dashed')+
-#   scale_color_viridis_d(begin = 0.2, end = 0.8) +
-#   theme_bw()+
-#   theme(axis.text.x = element_text(angle = 60, hjust = 1.05, vjust = 1, size = 11),
-#         axis.text.y = element_text(size = 11))+
-#   labs(x = '', y = 'Terminal biomass change from base scenario (%)', shape = 'Assumption', color = 'Regime')+
-#   facet_grid(~Guild, scales = 'free_x', space = 'free_x')
-# p_assumptions_rel
-# ggsave(paste0('output/', now, '/biom_assumptions_rel.png'), p_assumptions_rel, width = 8, height = 4.5)
+p_assumptions_rel <- end_biom1 %>%
+  filter(Name %in% to_plot_assumptions) %>%
+  ggplot(aes(x = LongName, y = biom_change, group = regime))+
+  geom_point(aes(shape = label, color = regime), size = 4, position = position_dodge(width = 0.8))+
+  geom_hline(yintercept = 0, color = 'red', linetype = 'dashed')+
+  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1.05, vjust = 1, size = 11),
+        axis.text.y = element_text(size = 11))+
+  labs(x = '', y = 'Terminal biomass change from base scenario (%)', shape = 'Assumption', color = 'Regime')+
+  facet_grid(~Guild, scales = 'free_x', space = 'free_x')
+p_assumptions_rel
+ggsave(paste0('output/', now, '/biom_assumptions_rel.png'), p_assumptions_rel, width = 8, height = 4.5)
