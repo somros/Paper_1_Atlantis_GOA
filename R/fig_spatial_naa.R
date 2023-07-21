@@ -11,10 +11,13 @@ print('Doing fig_spatial_naa_static.R')
 # as a note, be careful with what these are: pick forage and groundfish and you will be talking about heatwave stuff
 fg_to_plot <- c('Capelin',  
                 'Arrowtooth_flounder',
-                'Sandlance', 
+                'Sandlance',
+                'Eulachon',
+                'Forage_slope',
                 'Pollock',
                 'Herring', 
-                'Cod')
+                'Cod',
+                'Halibut')
 
 # pick runs to compare
 control <- 'base'
@@ -43,28 +46,43 @@ box_naa_sf <- goa_sf %>%
   left_join(box_naa, by = 'box_id')
 
 # reorder factors
-box_naa_sf$Name <- factor(box_naa_sf$Name, 
-                          levels = c('Capelin',  
-                                     'Arrowtooth_flounder',
-                                     'Sandlance', 
-                                     'Pollock',
-                                     'Herring', 
-                                     'Cod'))
+# box_naa_sf$Name <- factor(box_naa_sf$Name, 
+#                           levels = c('Capelin',  
+#                                      'Arrowtooth_flounder',
+#                                      'Sandlance', 
+#                                      'Pollock',
+#                                      'Herring', 
+#                                      'Cod'))
 
+# p_map <- box_naa_sf %>%
+#   split(.$Name) %>%
+#   purrr::map(~ ggplot()+
+#                geom_sf(data = ., aes(fill = mean_change, color = mean_change), color = NA)+
+#                scale_fill_viridis()+
+#                geom_sf(data = coast_sf)+
+#                theme_bw()+
+#                theme(legend.position=c(.1,.7),
+#                      legend.background = element_blank(),
+#                      legend.key.size = unit(0.35, 'cm'))+
+#                labs(fill = '') +
+#                facet_wrap(~LongName)) %>%
+#   cowplot::plot_grid(plotlist = ., ncol = 2)
+# p_map
+#   
+# ggsave(paste0('output/', now, '/map_naa_relchange_', run_base, '_vs_', run_warm,'.png'),
+#        p_map,width = 8,height=5, dpi = 600)  
+
+# all on same scale as requested by several people
 p_map <- box_naa_sf %>%
-  split(.$Name) %>%
-  purrr::map(~ ggplot()+
-               geom_sf(data = ., aes(fill = mean_change, color = mean_change), color = NA)+
-               scale_fill_viridis()+
-               geom_sf(data = coast_sf)+
-               theme_bw()+
-               theme(legend.position=c(.1,.7),
-                     legend.background = element_blank(),
-                     legend.key.size = unit(0.35, 'cm'))+
-               labs(fill = '') +
-               facet_wrap(~LongName)) %>%
-  cowplot::plot_grid(plotlist = ., ncol = 2)
-p_map
-  
+  ggplot()+
+  geom_sf(aes(fill = mean_change, color = mean_change), color = NA)+
+  #scale_fill_viridis()+
+  colorspace::scale_fill_continuous_divergingx(palette = 'RdBu', mid = 0, rev = T) + 
+  geom_sf(data = coast_sf)+
+  theme_bw()+
+  labs(fill = '%') +
+  facet_wrap(~LongName, ncol = 3)
+
 ggsave(paste0('output/', now, '/map_naa_relchange_', run_base, '_vs_', run_warm,'.png'),
-       p_map,width = 8,height=5, dpi = 600)  
+       p_map,width = 8,height=4, dpi = 600)
+  

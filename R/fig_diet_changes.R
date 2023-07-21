@@ -10,7 +10,7 @@ print('Doing fig_diet_changes.R')
 # Barchart of selected groups ---------------------------------------------
 
 # these are the predators of interest for this plot (Codes)
-preds_to_keep <- c('CAP','SAN','HER','ATF','POL','COD','BDF','BSF')
+preds_to_keep <- c('CAP','SAN','HER','FOS','EUL','ATF','POL','COD','BDF','BSF')
 pred_names <- grps %>% 
   filter(Code %in% preds_to_keep) %>% 
   arrange(factor(Code, levels = preds_to_keep)) %>%
@@ -65,11 +65,12 @@ p_diet <- dietchange %>%
   geom_hline(yintercept = 0, linetype = 'dashed', color = 'red')+
   theme_bw()+
   labs(x = '', y = '% change', fill = 'Prey (>1% of diet)')+
-  facet_wrap(Predator_Guild~Predator_LongName, scales = 'free_x')
+  facet_wrap(Predator_Guild~Predator_LongName, scales = 'free_x')+
+  guides(fill = guide_legend(nrow = 21))
 p_diet
 
 ggsave(paste0('output/', now, '/diets_change_', control, '_vs_', experiment,'.png'),
-       p_diet,width = 6.5,height=5)  
+       p_diet,width = 7.7,height=6)  
 
 # All groups heatmap ------------------------------------------------------
 

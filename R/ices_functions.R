@@ -141,8 +141,8 @@ compare_diets <- function(dietcheck, prednames, run, age_split = 'none'){
       left_join((grps %>% select(Code, Name, LongName)), by = c('Prey'='Code')) %>%
       rename(Prey_Name = Name, Prey_LongName = LongName) %>%
       mutate(Cohort = NA) %>% # add empty cohort variable
-      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)#%>%
-      #filter(Prop > 0.01)
+      select(Prop, Predator_Name, Predator_LongName, Cohort, Prey_Name, Prey_LongName)%>%
+      filter(Prop > 0.01)
 
       colnames(dietcheck1)[1] <- paste('Prop', run, sep = '_')
     

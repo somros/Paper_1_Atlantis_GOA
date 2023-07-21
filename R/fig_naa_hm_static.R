@@ -45,7 +45,8 @@ naa_heatmap$Guild <- gsub(' ',
                           naa_heatmap$Guild)
 
 # make labels
-run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
+#run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
+run_labs <- c('Scenario 4', 'Scenario 2', 'Scenario 3')
 names(run_labs) <- c('abun_warm_prod','abun_warm','abun_prod')
 
 # take last 5 years only
@@ -66,34 +67,36 @@ naa_heatmap_5y_1 <- naa_heatmap_5y %>%
                                           "Other\ndemersal\nfish",      
                                           "Seabirds")))
 
-naa_heatmap_5y_1 <- naa_heatmap_5y %>%
-  filter(Name %in% plot_these) %>%
-  mutate(Guild = factor(Guild, levels = c("Algae",
-                                          "Phytoplankton",
-                                          "Zooplankton",
-                                          "Infauna",
-                                          "Epibenthos",
-                                          "Crustaceans",
-                                          "Shrimps",
-                                          "Cephalopod",
-                                          "Forage\nfish",
-                                          "Flatfish",
-                                          "Gadids",
-                                          "Sebastes\nand\nSebastolobus",
-                                          "Other\ndemersal\nfish",
-                                          "Salmon",
-                                          "Cartilaginous\nfish",
-                                          "Seabirds",
-                                          "Marine\nmammals",
-                                          "Detritus\nand\nbacteria")))
+# naa_heatmap_5y_1 <- naa_heatmap_5y %>%
+#   filter(Name %in% plot_these) %>%
+#   mutate(Guild = factor(Guild, levels = c("Algae",
+#                                           "Phytoplankton",
+#                                           "Zooplankton",
+#                                           "Infauna",
+#                                           "Epibenthos",
+#                                           "Crustaceans",
+#                                           "Shrimps",
+#                                           "Cephalopod",
+#                                           "Forage\nfish",
+#                                           "Flatfish",
+#                                           "Gadids",
+#                                           "Sebastes\nand\nSebastolobus",
+#                                           "Other\ndemersal\nfish",
+#                                           "Salmon",
+#                                           "Cartilaginous\nfish",
+#                                           "Seabirds",
+#                                           "Marine\nmammals",
+#                                           "Detritus\nand\nbacteria")))
 
 # plot
 naa_hm <- naa_heatmap_5y_1 %>%
   filter(Name %in% fg_to_plot) %>%
   #filter(Name != 'Salmon_pink', Name != 'Skate_big') %>%
   ggplot()+
-  geom_tile(aes(x = age, y = LongName, fill = percent_change))+
-  scale_fill_viridis()+
+  geom_tile(aes(x = age, y = LongName, fill = percent_change), color = 'lightgrey')+
+  #scale_fill_viridis()+
+  #scale_fill_distiller(palette = 'RdBu')+
+  colorspace::scale_fill_continuous_divergingx(palette = 'RdBu', mid = 0, rev = T) + 
   theme_bw()+
   scale_x_continuous(breaks = 1:10)+
   labs(x = 'Age class', y = '', fill = '%')+#, title = 'Relative change in numbers at age from control run')+
@@ -102,7 +105,7 @@ naa_hm <- naa_heatmap_5y_1 %>%
 naa_hm
 
 ggsave(paste0('output/', now, '/naa_relchange_5y.png'),
-       naa_hm, width = 7.7, height=10, dpi = 600)
+       naa_hm, width = 7.7, height=4.5, dpi = 600)
 
 # some numbers
 tt <- naa_heatmap_5y_1 %>%

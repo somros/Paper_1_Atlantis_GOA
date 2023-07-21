@@ -66,7 +66,8 @@ end_biom <- end_biom %>%
   mutate(for_color = ifelse(change < 0, 'neg', 'pos'))
 
 # make labels
-run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
+#run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
+run_labs <- c('Scenario 4', 'Scenario 2', 'Scenario 3')
 names(run_labs) <- c('warm_prod_to_base','warm_to_base','prod_to_base')
 
 # fudge guild labels to have them horizontal in the figure
@@ -75,42 +76,42 @@ end_biom$Guild <- gsub(' ',
                         end_biom$Guild)
 
 # order guilds so that they go from low to high trophic level starting from the top of the plot
-end_biom1 <- end_biom %>%
-  filter(Name %in% plot_these) %>%
-  mutate(Guild = factor(Guild, levels = c("Phytoplankton",
-                                          "Zooplankton",
-                                          "Forage\nfish",
-                                          "Flatfish",
-                                          "Gadids",
-                                          "Sebastes\nand\nSebastolobus",
-                                          "Other\ndemersal\nfish",
-                                          "Seabirds")))
-
 # end_biom1 <- end_biom %>%
 #   filter(Name %in% plot_these) %>%
-#   mutate(Guild = factor(Guild, levels = c("Algae",
-#                                           "Phytoplankton",
+#   mutate(Guild = factor(Guild, levels = c("Phytoplankton",
 #                                           "Zooplankton",
-#                                           "Infauna",
-#                                           "Epibenthos",
-#                                           "Crustaceans",
-#                                           "Shrimps",
-#                                           "Cephalopod",
 #                                           "Forage\nfish",
 #                                           "Flatfish",
 #                                           "Gadids",
 #                                           "Sebastes\nand\nSebastolobus",
 #                                           "Other\ndemersal\nfish",
-#                                           "Salmon",
-#                                           "Cartilaginous\nfish",
-#                                           "Seabirds",
-#                                           "Marine\nmammals",
-#                                           "Detritus\nand\nbacteria")))
+#                                           "Seabirds")))
+
+end_biom1 <- end_biom %>%
+  filter(Name %in% plot_these) %>%
+  mutate(Guild = factor(Guild, levels = c("Algae",
+                                          "Phytoplankton",
+                                          "Zooplankton",
+                                          "Infauna",
+                                          "Epibenthos",
+                                          "Crustaceans",
+                                          "Shrimps",
+                                          "Cephalopod",
+                                          "Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",
+                                          "Salmon",
+                                          "Cartilaginous\nfish",
+                                          "Seabirds",
+                                          "Marine\nmammals",
+                                          "Detritus\nand\nbacteria")))
   
 # plot
 p_biom <- end_biom1 %>%
   ggplot(aes(x=LongName, y=change, color = for_color)) + 
-  geom_hline(yintercept = 0, color = 'red') +
+  geom_hline(yintercept = 0, color = 'grey', linetype = 'dashed') +
   geom_point(stat='identity', fill="black", size=3)  +
   geom_segment(aes(y = 0,
                    x = LongName,
@@ -118,7 +119,8 @@ p_biom <- end_biom1 %>%
                    xend = LongName, 
                    color = for_color),
                linewidth = 1.5) +
-  scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  #scale_color_viridis_d(begin = 0.2, end = 0.8) +
+  scale_color_manual(values = c('dodgerblue4','firebrick3'))+
   theme_bw() +
   labs(x = '', y = '% change in biomass from base scenario') + 
   guides(color="none") +
@@ -127,11 +129,11 @@ p_biom <- end_biom1 %>%
   theme(strip.text.y = element_text(angle = 0))
 p_biom
 
-ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 8.5, height = 12)
+ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 7.5, height = 11)
 
-# # some numbers
-# tt <- end_biom1 %>%
-#   group_by(run, Name) %>%
-#   summarise(meanchange = mean(change)) %>%
-#   ungroup() %>%
-#   filter(run == 'prod_to_base')
+# some numbers
+tt <- end_biom1 %>%
+  group_by(run, Name) %>%
+  summarise(meanchange = mean(change)) %>%
+  ungroup() %>%
+  filter(run == 'prod_to_base')

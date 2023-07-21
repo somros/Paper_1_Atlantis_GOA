@@ -12,12 +12,27 @@ print('Doing fig_intro_methods.R')
 
 # Plot model domain -------------------------------------------------------
 
+# do boxes by discrete depthclass bins instead of true depth
+goa_sf <- goa_sf %>%
+  mutate(dz = case_when(
+    botz >= -30 & botz < 0 ~ '0-30 m',
+    botz >= -100 & botz < -30 ~ '30-100 m',
+    botz >= -200 & botz < -100 ~ '100-200 m',
+    botz >= -500 & botz < -200 ~ '200-500 m',
+    botz >= -1000 & botz < -500 ~ '500-1000 m',
+    .default = 'Boundary'
+  ))
+# order
+goa_sf$dz <- factor(goa_sf$dz, levels = c('0-30 m','30-100 m','100-200 m','200-500 m','500-1000 m','Boundary'))
+my_cols <- c(brewer.pal(5, "Blues"), 'darkgrey')
+
 p_geometry <- goa_sf %>%
   ggplot()+
-  geom_sf(aes(fill=botz))+
+  geom_sf(aes(fill=dz))+
   #scale_fill_viridis()+
-  scale_fill_gradient(low='navyblue', high='cadetblue1')+
-  geom_sf(data=coast_sf, fill = 'grey')+
+  #scale_fill_gradient(low='navyblue', high='cadetblue1')+
+  scale_fill_manual(values = my_cols)+
+  geom_sf(data=coast_sf, fill = 'lightgrey')+
   coord_sf()+
   #geom_sf_text(aes(label=.bx0))+
   theme_bw()+
@@ -178,9 +193,9 @@ biom_prod_long <- biom_prod %>%
 # join and get biomass relative to base run
 biom_all <- biom_base_long %>%
   left_join(biom_prod_long, by = c('Time','Code','Name')) %>%
-  mutate(Control = mt_base / mt_base,
-         Warm = mt_prod / mt_base) %>%
-  select(Time, Code, Name, Control, Warm) %>%
+  mutate(`Base model` = mt_base / mt_base,
+         `Scenario 3` = mt_prod / mt_base) %>%
+  select(Time, Code, Name, `Base model`, `Scenario 3`) %>%
   pivot_longer(-c(Time, Code, Name), names_to = 'Run', values_to = 'rel_biomass')
 
 # plot biomass over time, keep only plankton groups that we are changing
@@ -188,7 +203,7 @@ p_prod <- biom_all %>%
   filter(Code %in% c('PL','ZM','EUP')) %>%  # c('PL','PS','ZL','ZM', 'ZS','EUP')
   ggplot(aes(x = Time, y = rel_biomass, group = Run))+
   geom_line(aes(color = Run, linetype = Run), linewidth = 0.8)+
-  scale_color_viridis_d(begin = 0.2, end = 0.8)+
+  #scale_color_viridis_d(begin = 0.2, end = 0.8)+
   # annotate("rect", xmin = 30, xmax = 35, ymin = -Inf, ymax = Inf,
   #          alpha = .2, fill = 'yellow')+
   theme_bw()+
@@ -241,7 +256,7 @@ tcorr_frame <- data.frame('Tamb' = seq(0, 30, 0.1)) %>%
 tcorr_frame_long <- tcorr_frame %>%
   pivot_longer(-Tamb, names_to = 'Species', values_to = 'Tcorr')
 
-#tcorr_frame_long$Species <- gsub('ATF', 'Arrowtooth flounder', tcorr_frame_long$Species)
+tcorr_frame_long$Species <- gsub('ATF', 'Arrowtooth flounder', tcorr_frame_long$Species)
   
 p_q10 <- tcorr_frame_long %>%
   ggplot(aes(x = Tamb, y = Tcorr, color = Species))+
@@ -295,7 +310,7 @@ dat2 <- do.call("rbind", replicate(length(temp), dat1, simplify = FALSE)) %>%
   mutate(temp = rep(temp, nrow(dat)))
 
 # apply function
-to_show <- c('ATF','Cod','Pollock','Halibut')
+to_show <- c('Arrowtooth flounder','Cod','Pollock','Halibut')
 
 dat3 <- dat2 %>%
   mutate(niche = purrr::pmap(list(min_sp = mint, max_sp = maxt, current_enviro = temp), make_niche)) %>%
@@ -303,7 +318,7 @@ dat3 <- dat2 %>%
   select(Code, Name, mint, maxt, temp, niche)
 
 # ATF too long for poster
-dat3$Name <- gsub('Arrowtooth_flounder', 'ATF', dat3$Name)
+dat3$Name <- gsub('Arrowtooth_flounder', 'Arrowtooth flounder', dat3$Name)
 
 dat_vline <- dat3 %>%
   select(Code, Name, mint, maxt) %>%
@@ -319,8 +334,9 @@ p_niche <- dat3 %>%
   filter(Name %in% to_show)%>%
   ggplot()+
   geom_line(aes(x = temp, y = niche), linewidth = 1.5)+
-  geom_vline(data = dat_vline, aes(xintercept = temp, color = edge), linewidth = 1.5)+
-  scale_color_viridis_d(begin = 0.2, end = 0.8)+
+  geom_vline(data = dat_vline, aes(xintercept = temp, color = edge), linewidth = 1.5, linetype = 'dashed')+
+  scale_color_manual(values = c('firebrick','navy'))+
+  #scale_color_viridis_d(begin = 0.2, end = 0.8)+
   theme_bw()+
   labs(x = 'Temperature (\u00B0C)', y = 'Scalar on abundance', color = '')+
   facet_wrap(~Name, ncol = 4)

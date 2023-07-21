@@ -4,7 +4,7 @@
 # it also helps calculate some metrics that are useful to evaluate model skill sensu Kaplan and Marshall 2016.
 # This is to be used for S1
 
-run_base <- 1317
+run_base <- 1327
 dir_base <- paste0('../../../GOA/Parametrization/output_files/data/out_', run_base, '/')
 
 # how long is the simulation period?
@@ -166,7 +166,7 @@ for(i in 1:npage){
     labs(x = 'Year', y = 'Mean body weight (kg)', color = 'Age group')+
     facet_wrap(~LongName, scales = 'free_y', ncol = 3,  nrow = 4)
   
-  ggsave(paste0('output/S1_ts/', this_run, '/WAA_ts_', i, '.png'), p_waa, width = 8, height = 10)
+  ggsave(paste0('output/S1_ts/', run_base, '/WAA_ts_', i, '.png'), p_waa, width = 8, height = 10)
   
 }
 
@@ -192,9 +192,51 @@ for(i in 1:npage){
     labs(x = 'Year', y = 'Number of individuals', color = 'Age group')+
     facet_wrap(~LongName, scales = 'free_y', ncol = 3,  nrow = 4)
   
-  ggsave(paste0('output/S1_ts/', this_run, '/NAA_ts_', i, '.png'), p_waa, width = 8, height = 10)
+  ggsave(paste0('output/S1_ts/', run_base, '/NAA_ts_', i, '.png'), p_waa, width = 8, height = 10)
   
 }
 
 rm(nage_all)
 gc()
+
+# total biomass
+biom_long <- total_biomass %>%
+  dplyr::select(Time:DR) %>%
+  pivot_longer(-Time, names_to = 'Code', values_to = 'Biomass') %>%
+  left_join(grps %>% select(Code, LongName)) %>%
+  mutate(year = Time / 365)
+
+# caculate change from initial biomass
+biom_long <- biom_long %>%
+  left_join(init_biomass) %>%
+  mutate(Relbiom = Biomass / biomass_init)
+
+# need to make a new page key with inverts too
+page_key <- biom_long %>% 
+  dplyr::select(LongName) %>% 
+  distinct() %>% 
+  arrange(LongName) %>%
+  mutate(page = rep(1:4, each = ceiling(nrow(.) / npage))[1:nrow(.)])
+
+biom_long <- biom_long %>%
+  left_join(page_key)
+
+for(i in 1:npage){
+  
+  p_relbio <- biom_long %>%
+    filter(page == i) %>%
+    filter(year <= simyears) %>%
+    ggplot(aes(x = year, y = Relbiom))+
+    geom_hline(yintercept = 1, color = 'green', linetype = 'dashed', linewidth = 1)+
+    geom_hline(yintercept = 0.5, color = 'orange', linetype = 'dashed', linewidth = 1)+
+    geom_hline(yintercept = 2, color = 'orange', linetype = 'dashed', linewidth = 1)+
+    geom_hline(yintercept = 0.25, color = 'red', linetype = 'dashed', linewidth = 1)+
+    geom_hline(yintercept = 4, color = 'red', linetype = 'dashed', linewidth = 1)+
+    geom_line(linewidth = 1)+
+    theme_bw()+
+    labs(x = 'Year', y = 'Relative biomass')+
+    facet_wrap(~LongName, scales = 'free_y', ncol = 4,  nrow = 5)
+  
+  ggsave(paste0('output/S1_ts/', run_base, '/biomass_', i, '.png'), p_relbio, width = 8, height = 10)
+  
+}
