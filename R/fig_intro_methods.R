@@ -203,11 +203,12 @@ p_prod <- biom_all %>%
   filter(Code %in% c('PL','ZM','EUP')) %>%  # c('PL','PS','ZL','ZM', 'ZS','EUP')
   ggplot(aes(x = Time, y = rel_biomass, group = Run))+
   geom_line(aes(color = Run, linetype = Run), linewidth = 0.8)+
+  scale_color_manual(values = c('dodgerblue4','firebrick3'))+
   #scale_color_viridis_d(begin = 0.2, end = 0.8)+
   # annotate("rect", xmin = 30, xmax = 35, ymin = -Inf, ymax = Inf,
   #          alpha = .2, fill = 'yellow')+
   theme_bw()+
-  labs(x = 'Year', y = 'Biomass relative to control')+
+  labs(x = 'Year', y = 'Biomass relative to control', color = '', linetype = '')+
   facet_wrap(~Name, ncol = 3)
 p_prod
 

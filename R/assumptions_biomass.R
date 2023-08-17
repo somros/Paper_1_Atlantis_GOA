@@ -3,22 +3,22 @@
 # list runs
 # review these at home...
 # cold runs
-cold_niches_summer_dists <- 1292
-cold_no_niches <- 1296
-cold_niches_winter_dists <- 1298
-cold_q10_0 <- 1302
-cold_q10_2 <- 1304
+cold_niches_summer_dists <- 1328
+cold_no_niches <- 1332
+cold_niches_winter_dists <- 1334
+cold_q10_0 <- 1338
+cold_q10_2 <- 1340
 cold_q10_altE <- 1258
-cold_no_q10 <- 1300
+cold_no_q10 <- 1336
 
 # warm runs
-warm_niches_summer_dists <- 1293
-warm_no_niches <- 1297
-warm_niches_winter_dists <- 1299
-warm_q10_0 <- 1303
-warm_q10_2 <- 1305
+warm_niches_summer_dists <- 1329
+warm_no_niches <- 1333
+warm_niches_winter_dists <- 1335
+warm_q10_0 <- 1339
+warm_q10_2 <- 1341
 warm_q10_altE <- 1259
-warm_no_q10 <- 1301
+warm_no_q10 <- 1337
 
 # set paths to directories
 dir_cold_niches_summer_dists <- paste0('../../../GOA/Parametrization/output_files/data/out_', cold_niches_summer_dists, '/')
