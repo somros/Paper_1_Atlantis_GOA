@@ -67,7 +67,10 @@ end_biom <- end_biom %>%
 
 # make labels
 #run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
-run_labs <- c('Scenario 4', 'Scenario 2', 'Scenario 3')
+#run_labs <- c('Scenario 4', 'Scenario 2', 'Scenario 3')
+run_labs <- c('Scenario 4\n(Increased temperature,\nDecreased LTL productivity)', 
+              'Scenario 2\n(Increased temperature)', 
+              'Scenario 3\n(Decreased LTL productivity)') # addressing Joe's comment
 names(run_labs) <- c('warm_prod_to_base','warm_to_base','prod_to_base')
 
 # fudge guild labels to have them horizontal in the figure
@@ -129,7 +132,7 @@ p_biom <- end_biom1 %>%
   theme(strip.text.y = element_text(angle = 0))
 p_biom
 
-ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 7.5, height = 11)
+ggsave(paste0('output/', now, '/biom_change.png'), p_biom, width = 8.3, height = 11)
 
 # some numbers
 tt <- end_biom1 %>%

@@ -258,10 +258,48 @@ tcorr_frame_long <- tcorr_frame %>%
   pivot_longer(-Tamb, names_to = 'Species', values_to = 'Tcorr')
 
 tcorr_frame_long$Species <- gsub('ATF', 'Arrowtooth flounder', tcorr_frame_long$Species)
+
+tcorr_frame_long$Type <- 'Unimodal'
+
+# adding default Atlantis response
+make_curve_default <- function(species, dat, Tamb){
   
-p_q10 <- tcorr_frame_long %>%
+  Cq <- dat %>% filter(Par == 'Cq') %>% pull(species)
+  Tbase <- 10
+  
+  Tcorr <- Cq ^ ((Tamb-Tbase)/10)
+  
+  return(Tcorr)
+  
+}
+
+tcorr_frame_default <- data.frame('Tamb' = seq(0, 30, 0.1)) %>%
+  mutate(Pollock = make_curve_default('Pollock', dat, Tamb),
+         Cod = make_curve_default('Cod', dat, Tamb),
+         ATF = make_curve_default('ATF', dat, Tamb),
+         Halibut = make_curve_default('Halibut', dat, Tamb)) 
+
+tcorr_frame_long_default <- tcorr_frame_default %>%
+  pivot_longer(-Tamb, names_to = 'Species', values_to = 'Tcorr')
+
+# for the default we need to truncate the values for the default response
+tcorr_frame_long_default <- tcorr_frame_long_default %>% filter(Tcorr < 2)
+
+tcorr_frame_long_default$Species <- gsub('ATF', 'Arrowtooth flounder', tcorr_frame_long_default$Species)
+
+# add column for the type of response
+tcorr_frame_long_default$Type <- 'Default Q10'
+
+# bind unimodal and default
+tcorr_forplot <- rbind(tcorr_frame_long,tcorr_frame_long_default)
+
+# order factors where needed
+tcorr_forplot$Type <- factor(tcorr_forplot$Type, levels = c('Unimodal','Default Q10'))
+
+p_q10 <- tcorr_forplot %>%
   ggplot(aes(x = Tamb, y = Tcorr, color = Species))+
-  geom_line(linewidth = 1.5)+
+  geom_line(aes(linetype = Type), linewidth = 1.5)+
+  geom_hline(yintercept = 1, color = 'red', linetype = 'dotted')+
   scale_color_viridis_d(begin = 0.1, end = 0.9)+
   theme_bw()+
   labs(x = 'Temperature (\u00B0C)', y = bquote('T'[scalar]))
@@ -346,5 +384,8 @@ ggsave('output/thermal_niche_groundfish.png', p_niche, width = 6, height = 2.5, 
 
 # together
 library(patchwork)
-p_both <- (p_niche / p_q10) + plot_annotation(tag_levels = "A")
-ggsave('temp_paper.png', p_both, width = 8, height = 4)  
+p_both <- (p_niche / p_q10) + 
+  plot_annotation(tag_levels = "A") +
+  plot_layout(nrow = 2, heights = c(2, 4))
+
+ggsave('temp_paper.png', p_both, width = 7.5, height = 5)  

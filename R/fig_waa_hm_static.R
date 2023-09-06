@@ -51,7 +51,10 @@ waa_heatmap$Guild <- gsub(' ',
 
 # make labels
 #run_labs <- c('Temperature + plankton', 'Temperature', 'Plankton')
-run_labs <- c('Scenario 4', 'Scenario 2', 'Scenario 3')
+#run_labs <- c('Scenario 4', 'Scenario 2', 'Scenario 3')
+run_labs <- c('Scenario 4\n(Increased temperature,\nDecreased LTL productivity)', 
+              'Scenario 2\n(Increased temperature)', 
+              'Scenario 3\n(Decreased LTL productivity)') # addressing Joe's comment
 names(run_labs) <- c('weight_warm_prod','weight_warm','weight_prod')
 
 # take last 5 years only
@@ -63,53 +66,54 @@ waa_heatmap_5y <- waa_heatmap %>%
   mutate(percent_change = ((weight_exp-weight_base)/weight_base)*100)
 
 # arrange guilds for plot
-waa_heatmap_5y_1 <- waa_heatmap_5y %>%
-  filter(Name %in% fg_to_plot) %>%
-  mutate(Guild = factor(Guild, levels = c("Forage\nfish",
-                                          "Flatfish",
-                                          "Gadids",
-                                          "Sebastes\nand\nSebastolobus",
-                                          "Other\ndemersal\nfish",      
-                                          "Seabirds")))
-
 # waa_heatmap_5y_1 <- waa_heatmap_5y %>%
-#   filter(Name %in% plot_these) %>%
-#   mutate(Guild = factor(Guild, levels = c("Algae",
-#                                           "Phytoplankton",
-#                                           "Zooplankton",
-#                                           "Infauna",
-#                                           "Epibenthos",
-#                                           "Crustaceans",
-#                                           "Shrimps",
-#                                           "Cephalopod",
-#                                           "Forage\nfish",
+#   filter(Name %in% fg_to_plot) %>%
+#   mutate(Guild = factor(Guild, levels = c("Forage\nfish",
 #                                           "Flatfish",
 #                                           "Gadids",
 #                                           "Sebastes\nand\nSebastolobus",
-#                                           "Other\ndemersal\nfish",
-#                                           "Salmon",
-#                                           "Cartilaginous\nfish",
-#                                           "Seabirds",
-#                                           "Marine\nmammals",
-#                                           "Detritus\nand\nbacteria")))
+#                                           "Other\ndemersal\nfish",      
+#                                           "Seabirds")))
+
+waa_heatmap_5y_1 <- waa_heatmap_5y %>%
+  filter(Name %in% plot_these) %>%
+  mutate(Guild = factor(Guild, levels = c("Algae",
+                                          "Phytoplankton",
+                                          "Zooplankton",
+                                          "Infauna",
+                                          "Epibenthos",
+                                          "Crustaceans",
+                                          "Shrimps",
+                                          "Cephalopod",
+                                          "Forage\nfish",
+                                          "Flatfish",
+                                          "Gadids",
+                                          "Sebastes\nand\nSebastolobus",
+                                          "Other\ndemersal\nfish",
+                                          "Salmon",
+                                          "Cartilaginous\nfish",
+                                          "Seabirds",
+                                          "Marine\nmammals",
+                                          "Detritus\nand\nbacteria")))
 
 # plot
 waa_hm <- waa_heatmap_5y_1 %>%
   #filter(Name != 'Salmon_pink') %>% # salmon pink died in those runs but bring it back in if it survives
   ggplot()+
-  geom_tile(aes(x = age, y = LongName, fill = percent_change), color = 'lightgrey')+
+  geom_tile(aes(x = age, y = LongName, fill = percent_change), color = 'darkgrey')+
   #scale_fill_viridis()+
   #scale_fill_distiller(palette = 'RdBu')+
   colorspace::scale_fill_continuous_divergingx(palette = 'RdBu', mid = 0, rev = T) + 
   theme_bw()+
   scale_x_continuous(breaks = 1:10)+
   labs(x = 'Age class', y = '', fill = '%')+#, title = 'Relative change in weight at age from control run')+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
   facet_grid(Guild~run, scales = 'free_y', space = 'free_y', labeller = labeller(run = run_labs))+
   theme(strip.text.y = element_text(angle = 0))
 waa_hm
 
-ggsave(paste0('output/', now, '/waa_relchange_5y.png'),
-       waa_hm, width = 7.7, height=4.5, dpi = 600)
+ggsave(paste0('output/', now, '/waa_relchange_5y1.png'),
+       waa_hm, width = 9, height=11, dpi = 600)
 
 
 # some numbers

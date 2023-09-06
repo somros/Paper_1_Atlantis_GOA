@@ -230,11 +230,12 @@ p_assumptions <- end_biom %>%
   #scale_color_viridis_d(begin = 0.2, end = 0.8) +
   scale_color_manual(values = c('dodgerblue4','firebrick3'))+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1.05, vjust = 1, size = 11),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1.05, vjust = 1, size = 11),
         axis.text.y = element_text(size = 11))+
   labs(x = '', y = 'Final biomass (1000 mt)', shape = 'Assumption', color = 'Regime')+
   facet_grid(realism~Guild, scales = 'free_x', space = 'free_x')
 p_assumptions
+ggsave(paste0('output/', now, '/biom_assumptions.png'), p_assumptions, width = 12, height = 4.5)
 
 ggsave(paste0('output/', now, '/biom_assumptions.png'), p_assumptions, width = 8, height = 5)
 
@@ -278,4 +279,4 @@ p_assumptions_rel <- end_biom1 %>%
   labs(x = '', y = 'Terminal biomass change from base scenario (%)', shape = 'Assumption', color = 'Regime')+
   facet_grid(realism~Guild, scales = 'free_x', space = 'free_x')
 p_assumptions_rel
-ggsave(paste0('output/', now, '/biom_assumptions_rel.png'), p_assumptions_rel, width = 8, height = 4.5)
+ggsave(paste0('output/', now, '/biom_assumptions_rel.png'), p_assumptions_rel, width = 12, height = 4.5)

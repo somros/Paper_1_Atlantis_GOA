@@ -177,9 +177,28 @@ for (i in 1:length(all_fg)){
 
 diets_base <- read.table(paste0(this_dir, 'outputGOA0', this_run, '_testDietCheck.txt'), header = T)
 
+# # what's with chinook and sockeye?
+# diets_base %>%
+#   filter(Predator == 'SCH') %>%
+#   mutate(Time = Time / 365) %>%
+#   filter(Time >= (max(Time)-5)) %>%
+#   group_by(Predator, Cohort) %>%
+#   summarise(across(KWT:DR, mean)) %>%
+#   ungroup() %>%
+#   pivot_longer(-c(Predator, Cohort), names_to = 'Prey', values_to = 'Prop') %>%
+#   group_by(Cohort) %>%
+#   summarise(check = sum(Prop))
+# # no diet output for th last age class (it goes extinct? something to do with semelparity possibly)
+
+# drop cohort 6 for SCH and SSO
+diets_base <- diets_base %>% 
+  filter(!(Predator == 'SCH' & Cohort == 6)) %>%
+  filter(!(Predator == 'SSO' & Cohort == 6))
+
 # do it again with all predators
 # TODO: probably step 1 above should be a subset of step 2 here, rather than applying the functions twice
-preds_to_keep <- pred_codes
+# preds_to_keep <- pred_codes
+preds_to_keep <- c('SCH','SSO')
 pred_names <- grps %>%
   filter(Code %in% preds_to_keep) %>%
   arrange(factor(Code, levels = preds_to_keep)) %>%
@@ -191,6 +210,9 @@ diets_processed <- compare_diets(diets_base, prednames = pred_names, run = this_
 # # order names and stages of the predators
 diets_processed <- diets_processed %>%
   arrange(factor(Predator_Name, levels = pred_names))
+
+# filter out species that we are not looking at
+diets_processed <- diets_processed %>% filter(Predator_Name %in% pred_names)
 
 # fix order of Predator_Name
 diets_processed$Predator_Name <- factor(diets_processed$Predator_Name, levels = pred_names)
